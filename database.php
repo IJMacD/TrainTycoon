@@ -153,7 +153,7 @@ class DB
 			if(!isset($this->commodities[$town_id][$commodity]))
 			{
 				$this->log('Commodity specified don\'t have it', 2);
-				$this->commodities[$town_id][$commodity] = array('name' => $commodity, 'surplus' => 0, 'price' => 0);
+				$this->commodities[$town_id][$commodity] = array('name' => $commodity, 'supply' => 0, 'demand' => 0, 'surplus' => 0, 'price' => 0);
 			}
 			else
 				$this->log('Commodity specified do have it', 2);
@@ -212,7 +212,7 @@ class DB
 				$surplus = $dsurplus;
 			}*/
 			$factor = 1;
-			$this->log("$commodity Initial Values: Price $price, Supply $supply, Demand $demand, Delta $dsurplus");
+			$this->log("TRADE: [$commodity-$town_id] Initial: Price $price, Supply $supply, Demand $demand");
 			if($dsurplus > 0)
 			{
 				$supply += $dsurplus;
@@ -221,8 +221,15 @@ class DB
 			{
 				$demand -= $dsurplus;
 			}
-			$price = ($demand / $supply) * $factor;
-			$this->log("$commodity Final Values: Price $price, Supply $supply, Demand $demand");
+			// P = m_D.Q + c_D
+			// P = m_S.Q + c_S
+			// M = m_D/m_S
+			// P = (M.c_D + c_S)/(1 - M)
+			// Q === surplus
+			// dP = m_D.dQ
+			$m_D = -1;
+			$price += $m_D * $dsurplus;
+			$this->log("TRADE: [$commodity-$town_id] Final: Price $price, Supply $supply, Demand $demand");
 			//$price = max(0, $price);
 		}else{
 			$price = $CONST['commodities'][$commodity]['price'];
@@ -231,8 +238,8 @@ class DB
 		}
 		
 		$q = "INSERT INTO `".TABLE_commodities."` (`town_id`,`commodity`,`surplus`,`demand`,`price`) "
-			."VALUES ('$town_id','$commodity',$supply,$demand,$price) "
-			."ON DUPLICATE KEY UPDATE `surplus` = $supply, `demand` = $demand, `price` = $price";
+			."VALUES ('$town_id','$commodity','$supply','$demand','$price') "
+			."ON DUPLICATE KEY UPDATE `surplus` = '$supply', `demand` = '$demand', `price` = '$price'";
 		$this->query($q);
 		if(!isset($this->commodities)) $this->commodities = array();
 		if(!isset($this->commodities[$town_id])) $this->commodities[$town_id] = array();

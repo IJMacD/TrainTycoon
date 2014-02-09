@@ -241,8 +241,10 @@ function plot_data(data){
 							plot_in_1[i] = plot_in_1[i+1];
 							plot_out_1[i] = plot_out_1[++i];
 					}
-					plot_in.length--;
-					plot_out.length--;
+                                        plot_in.length--;
+                                        plot_out.length--;
+                                        plot_in_1.length--;
+                                        plot_out_1.length--;
 			}
 
 			plot_in[plot_in.length] = ifin;

@@ -28,6 +28,7 @@ function update()
 	background: #F0F0FF;
 	margin: 3px;
 	padding: 5px;
+	display: inline-block;
 }
 </style>
 <input type="button" onclick="$('#trains').load('loop.php?state=play')" value="Play" />

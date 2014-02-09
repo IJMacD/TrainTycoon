@@ -26,10 +26,10 @@ define("TABLE_commodities", "commodities");
 $COSNT = array();
 
 $CONST['buildings'] = array(	// Rate per year
-	"sheep_farm" => array("wool" => 4),
+	"sheep_farm" => array("wool" => 12),
 	"cotton_mill" => array("wool" => -8, "fabric" => 4),
-	"textiles" => array("fabric" => -4, "clothes" => 6),
-	"retail" => array("fabric" => -4)
+	"textiles" => array("fabric" => -4, "clothes" => 2.5),
+	"retail" => array("clothes" => -2)
 	);
 $CONST['locos'] = array(
 	1 => array("name" => "Flying Scotsman", "number" => "4472", "configuration" => "4-6-2", "topspeed" => 100, "reliability" => 0.95, "price" => 1000, "start_year" => 1923, "image" => "images/10194-1.gif"),
@@ -37,7 +37,7 @@ $CONST['locos'] = array(
 	);
 $CONST['commodities'] = array(
 	"alcohol" => array("price" => 5, "car_image" => "images/a_10017_1.gif"),
-	"clothes" => array("price" => 3, "car_image" => "images/a_10017_1.gif"),
+	"clothes" => array("price" => 3, "car_image" => "images/10194b.gif"),
 	"coal" => array("price" => 3, "car_image" => "images/10183c.gif"),
 	"cotton" => array("price" => 1, "car_image" => "images/4512c.gif"),
 	"fabric" => array("price" => 2, "car_image" => "images/a_10017_1.gif"),

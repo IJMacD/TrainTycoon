@@ -21,7 +21,7 @@ function loop(){
 		outputJSON();
 	else
 	{
-		//updateInput();
+		updateInput();
 		updatePhysics();
 		updateState();
 		//updateScore();
@@ -69,7 +69,8 @@ function updateState(){
 			$town_id = $train->getTown();
 			
 			//unload
-			foreach($train->unload() as $car)
+			$unloaded_cars = $train->unload();
+			foreach($unloaded_cars as $car)
 			{
 				$g->updateCommodities($town_id, $car, +1);
 			}
@@ -77,27 +78,36 @@ function updateState(){
 			//load
 			$next_town = $train->getNextTown();
 			$success = true;
+			$biggest_price_difference = 0;
+			$best_commodity = "";
 			foreach($g->getCommodities($town_id) as $commodity)
 			{
 				$dest_commodity = $g->getCommodities($next_town, $commodity['name']);
 				
-				$database->log('Dest Price: '. $dest_commodity['price'].' Price: '.$commodity['price']);
-				
-				// We only want to load it if price is favourable
-				if($dest_commodity['price'] > $commodity['price'])
-				{
-					$surplus = $commodity['surplus'];
-					$database->log('Surplus: '.$surplus);
-					while($surplus > 1 && $success)
-					{
-						$database->log('Loading '.$commodity['name']);
-						$success = $train->load($commodity['name']);
-						$surplus--;
-					}
-					$g->updateCommodities($town_id, $commodity['name'], $surplus - $commodity['surplus']);
-					if(!$success)
-						break;
+				$database->log('['.$commodity['name'].'] Dest Price: '. $dest_commodity['price'].' Price: '.$commodity['price']);
+
+				$price_difference = $dest_commodity['price'] - $commodity['price'];
+
+				if($price_difference > $biggest_price_difference
+					&& $commodity['surplus']){
+					$best_commodity = $commodity;
+					$biggest_price_difference = $price_difference;
 				}
+			}
+
+			// We only want to load it if price is favourable
+			if($biggest_price_difference > 0)
+			{
+				$surplus = $best_commodity['surplus'];
+				$database->log('Surplus: '.$surplus);
+				while($surplus > 1 && $success)
+				{
+					$success = $train->load($best_commodity['name']);
+					$surplus--;
+				}
+				$loaded = $best_commodity['surplus'] - $surplus;
+				$database->log('Loaded '.$loaded.' '.$best_commodity['name']);
+				$g->updateCommodities($town_id, $best_commodity['name'], -$loaded);
 			}
 			
 			//turnaround
@@ -159,7 +169,7 @@ function updateScore(){
 // Output XML
 function updateVideo(){
 	global $g, $CONST, $lang;
-	if($g->getData('gameState') == STATE_PAUSED) echo '<h1 style="color: red;">'.$lang['en']['paused'].'</h1>';
+	if($g->State() == STATE_PAUSED) echo '<h1 style="color: red;">'.$lang['en']['paused'].'</h1>';
 	echo "Date: ".date("Y-m-d", $g->getData('simstamp'));
 	echo '<h1>'.$lang['en']['trains'].'</h1>';
 	foreach($g->getTrains() as $train){
@@ -188,7 +198,7 @@ function updateVideo(){
 	}
 	foreach($g->getTowns() as $town){
 		echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['Name'].'</b><br>';
-		echo '<table><tr><th>Name</th><th>Surplus</th><th>Price</th></tr>';
+		echo '<table><tr><th>Name</th><th>Quantity</th><th>Price</th></tr>';
 		foreach($g->getCommodities($town['id']) as $commodity){
 			echo '<tr><td>'.$commodity['name'].'</td><td>'.sprintf('%.3f', $commodity['surplus']).'</td><td>$'.sprintf('%.2f', $commodity['price']).'</td></tr>';
 		}
