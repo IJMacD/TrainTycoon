@@ -77,37 +77,59 @@ function updateState(){
 			
 			//load
 			$next_town = $train->getNextTown();
+			$commodities = $g->getCommodities($town_id);
 			$success = true;
-			$biggest_price_difference = 0;
-			$best_commodity = "";
-			foreach($g->getCommodities($town_id) as $commodity)
-			{
-				$dest_commodity = $g->getCommodities($next_town, $commodity['name']);
-				
-				$database->log('['.$commodity['name'].'] Dest Price: '. $dest_commodity['price'].' Price: '.$commodity['price']);
-
-				$price_difference = $dest_commodity['price'] - $commodity['price'];
-
-				if($price_difference > $biggest_price_difference
-					&& $commodity['surplus']){
-					$best_commodity = $commodity;
-					$biggest_price_difference = $price_difference;
-				}
-			}
-
-			// We only want to load it if price is favourable
-			if($biggest_price_difference > 0)
-			{
-				$surplus = $best_commodity['surplus'];
-				$database->log('Surplus: '.$surplus);
-				while($surplus > 1 && $success)
+			$tries = 4;
+			while($tries>0){
+				$biggest_price_difference = 0;
+				$best_commodity = -1;
+				foreach($commodities as $k => $commodity)
 				{
-					$success = $train->load($best_commodity['name']);
-					$surplus--;
+					$dest_commodity = $g->getCommodities($next_town, $commodity['name']);
+
+					$database->log('['.$commodity['name'].'] Dest Price: '. $dest_commodity['price'].' Price: '.$commodity['price']);
+
+					$price_difference = $dest_commodity['price'] - $commodity['price'];
+
+					if($price_difference > $biggest_price_difference &&
+							$commodity['surplus'] > 1){
+						$best_commodity = $k;
+						$biggest_price_difference = $price_difference;
+					}
 				}
-				$loaded = $best_commodity['surplus'] - $surplus;
-				$database->log('Loaded '.$loaded.' '.$best_commodity['name']);
-				$g->updateCommodities($town_id, $best_commodity['name'], -$loaded);
+
+				// We only want to load it if price is favourable
+				if($biggest_price_difference > 0 && $best_commodity >= 0)
+				{
+					$commodity_to_load = $commodities[$best_commodity];
+					$ctl = $commodity_to_load;
+
+					$database->log('Biggest Difference: ['.$ctl['name'].'] $'.$biggest_price_difference);
+
+					$surplus = $commodity_to_load['surplus'];
+					$database->log('Surplus: '.$surplus);
+					while($surplus > 1 && $success)
+					{
+						$success = $train->load($commodity_to_load['name']);
+						$surplus--;
+					}
+					$surplus++;
+					unset($commodities[$k]);
+					$loaded = $commodity_to_load['surplus'] - $surplus;
+					$database->log('Loaded '.$loaded.' '.$commodity_to_load['name']);
+					$g->updateCommodities($town_id, $commodity_to_load['name'], -$loaded);
+				}
+				else {
+					$success = false;
+				}
+				if(!$success)
+				{
+					$tries = 0;
+				}
+				// Supposed to loop through commodities finding highest profit margin each time
+				// until all cars are full.
+				// TODO: does not work - the line below is only to break the loop while the code is broken
+				$tries--;
 			}
 			
 			//turnaround
