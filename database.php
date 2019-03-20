@@ -211,7 +211,6 @@ class DB
 				$price *= (rand(16, 25) / 20);
 				$surplus = $dsurplus;
 			}*/
-			$factor = 1;
 			$this->log("TRADE: [$commodity-$town_id] Initial: Price $price, Supply $supply, Demand $demand");
 			if($dsurplus > 0)
 			{

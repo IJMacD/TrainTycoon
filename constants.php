@@ -29,7 +29,7 @@ $CONST['buildings'] = array(	// Rate per year
 	"sheep_farm" => array("wool" => 12),
 	"cotton_mill" => array("wool" => -8, "fabric" => 4),
 	"textiles" => array("fabric" => -4, "clothes" => 2.5),
-	"retail" => array("clothes" => -2)
+	"retail" => array("clothes" => -12)
 	);
 $CONST['locos'] = array(
 	1 => array("name" => "Flying Scotsman", "number" => "4472", "configuration" => "4-6-2", "topspeed" => 100, "reliability" => 0.95, "price" => 1000, "start_year" => 1923, "image" => "images/10194-1.gif"),

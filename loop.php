@@ -113,7 +113,6 @@ function updateState(){
 						$success = $train->load($commodity_to_load['name']);
 						$surplus--;
 					}
-					$surplus++;
 					unset($commodities[$k]);
 					$loaded = $commodity_to_load['surplus'] - $surplus;
 					$database->log('Loaded '.$loaded.' '.$commodity_to_load['name']);
