@@ -11,9 +11,9 @@ define("SPEED_SCALE", 120); // Real Seconds per Sim Hour
 define("TIME_SCALE", 600); // Real Seconds per Sim Year
 
 define("DB_HOST", "localhost");
-define("DB_USER", "root");
-define("DB_PASS", "");
-define("DB_NAME", "railtycoon");
+define("DB_USER", "railtycoon");
+define("DB_PASS", "6iJ27aJA4AQ5");
+define("DB_NAME", "train_tycoon");
 
 define("TABLE_data", "data");
 define("TABLE_locos", "locos");
