@@ -178,6 +178,8 @@ class DB
 	 */
 	function updateCommodities($town_id, $commodity, $dsurplus){
 		global $CONST;
+	
+		$return_value = 0;
 		
 		$c = $this->getCommodities($town_id);
 		//print_r($c);
@@ -186,6 +188,8 @@ class DB
 			$price = $c[$commodity]['price'];
 			$supply = $c[$commodity]['supply'];
 			$demand = $c[$commodity]['demand'];
+
+			$return_value = $dsurplus * $price;
 			/*
 			$q = "SELECT ";
 			$q .= "(SELECT AVG(`price`) FROM `".TABLE_commodities."` WHERE `commodity` = '$commodity') as 'avg_price',";
@@ -211,14 +215,16 @@ class DB
 				$price *= (rand(16, 25) / 20);
 				$surplus = $dsurplus;
 			}*/
-			$this->log("TRADE: [$commodity-$town_id] Initial: Price $price, Supply $supply, Demand $demand");
+			$this->log(($dsurplus > 0 ? "SELL" : "BUY") . ": [$commodity ($town_id)] Initial: Price $price, Supply $supply, Demand $demand");
 			if($dsurplus > 0)
 			{
 				$supply += $dsurplus;
+				$price -= ($dsurplus / $supply) * $price;
 			}
 			else
 			{
 				$demand -= $dsurplus;
+				$price -= ($dsurplus / $demand) * $price;
 			}
 			// P = m_D.Q + c_D
 			// P = m_S.Q + c_S
@@ -226,14 +232,15 @@ class DB
 			// P = (M.c_D + c_S)/(1 - M)
 			// Q === surplus
 			// dP = m_D.dQ
-			$m_D = -1;
-			$price += $m_D * $dsurplus;
-			$this->log("TRADE: [$commodity-$town_id] Final: Price $price, Supply $supply, Demand $demand");
+			// $m_D = -1;
+			$this->log(($dsurplus > 0 ? "SELL" : "BUY") . ": [$commodity ($town_id)] Final: Price $price, Supply $supply, Demand $demand");
 			//$price = max(0, $price);
 		}else{
 			$price = $CONST['commodities'][$commodity]['price'];
 			$price *= (rand(16, 25) / 20);
-			$supply = $dsurplus;
+			$supply = 1000 + $dsurplus;
+			$demand = 1000 - $dsurplus;
+			$return_value = $price * $dsurplus;
 		}
 		
 		$q = "INSERT INTO `".TABLE_commodities."` (`town_id`,`commodity`,`surplus`,`demand`,`price`) "
@@ -248,6 +255,8 @@ class DB
 		$this->commodities[$town_id][$commodity]['supply']	= $supply;
 		$this->commodities[$town_id][$commodity]['demand']	= $demand;
 		$this->commodities[$town_id][$commodity]['price']	= $price;
+
+		return $return_value;
 	}
 	
 	function populateLocosTable(){

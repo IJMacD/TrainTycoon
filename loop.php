@@ -72,15 +72,17 @@ function updateState(){
 			$unloaded_cars = $train->unload();
 			foreach($unloaded_cars as $car)
 			{
-				$g->updateCommodities($town_id, $car, +1);
+				$profit = $g->updateCommodities($town_id, $car, +1);
+				$wealth = $g->getData('wealth');
+				$g->setData('wealth', $wealth + $profit);
 			}
 			
 			//load
 			$next_town = $train->getNextTown();
-			$commodities = $g->getCommodities($town_id);
 			$success = true;
 			$tries = 4;
 			while($tries>0){
+				$commodities = $g->getCommodities($town_id);
 				$biggest_price_difference = 0;
 				$best_commodity = -1;
 				foreach($commodities as $k => $commodity)
@@ -91,8 +93,7 @@ function updateState(){
 
 					$price_difference = $dest_commodity['price'] - $commodity['price'];
 
-					if($price_difference > $biggest_price_difference &&
-							$commodity['surplus'] > 1){
+					if($price_difference > $biggest_price_difference && $commodity['surplus'] >= 1){
 						$best_commodity = $k;
 						$biggest_price_difference = $price_difference;
 					}
@@ -108,7 +109,7 @@ function updateState(){
 
 					$surplus = $commodity_to_load['surplus'];
 					$database->log('Surplus: '.$surplus);
-					while($surplus > 1 && $success)
+					while($surplus >= 1 && $success)
 					{
 						$success = $train->load($commodity_to_load['name']);
 						$surplus--;
@@ -116,7 +117,10 @@ function updateState(){
 					unset($commodities[$k]);
 					$loaded = $commodity_to_load['surplus'] - $surplus;
 					$database->log('Loaded '.$loaded.' '.$commodity_to_load['name']);
-					$g->updateCommodities($town_id, $commodity_to_load['name'], -$loaded);
+					$cost = $g->updateCommodities($town_id, $commodity_to_load['name'], -$loaded);
+
+					$wealth = $g->getData('wealth');
+					$g->setData('wealth', $wealth + $cost);
 				}
 				else {
 					$success = false;
@@ -191,7 +195,8 @@ function updateScore(){
 function updateVideo(){
 	global $g, $CONST, $lang;
 	if($g->State() == STATE_PAUSED) echo '<h1 style="color: red;">'.$lang['en']['paused'].'</h1>';
-	echo "Date: ".date("Y-m-d", $g->getData('simstamp'));
+	echo "<p>Date: ".date("Y-m-d", $g->getData('simstamp')) . "</p>";
+	echo "<p>Wealth: ". sprintf('$%.2f', $g->getData('wealth')) . "</p>";
 	echo '<h1>'.$lang['en']['trains'].'</h1>';
 	foreach($g->getTrains() as $train){
 		/*
@@ -201,7 +206,9 @@ function updateVideo(){
 		}
 		echo '</div>';
 		*/
-		echo '<div class="train_list" id="train_'.$train->id.'">'.$train->getName().'</b><br><img src="'.$CONST['locos'][$train->getLocoID()]['image'].'">';
+		$stations = $train->getStations();
+		$stations[$train->getSegment()] = '<b>' . $stations[$train->getSegment()] . '</b>';
+		echo '<div class="train_list" id="train_'.$train->id.'">'.$train->getName().'</b> ('.implode(", ", $stations).')<br><img src="'.$CONST['locos'][$train->getLocoID()]['image'].'">';
 		foreach($train->getCars() as $car){
 			echo '<img src="'.$CONST['commodities'][$car]['car_image'].'" title="'.$car.'">';
 		}
@@ -213,7 +220,20 @@ function updateVideo(){
 				echo '<br>'.$lang['en']['stopped_at'].' '.$train->getStation();;
 		}
 		else
+		{
 			echo '<br>'.$lang['en']['on_way_to'].' '.$train->getStation();
+
+			$cars = $train->getCars();
+			if (count($cars)) {
+				$value = 0;
+				$dest = $train->getTown();
+				foreach ($cars as $car) {
+					$c = $g->getCommodities($dest, $car);
+					$value += $c['price'];
+				}
+				echo " (Value: " . sprintf('$%.2f', $value) . ")";
+			}
+		}
 		echo '<br><img src="images/progress.gif" height="1" width="'.$train->getProgress().'%">';
 		echo '</div>';
 	}

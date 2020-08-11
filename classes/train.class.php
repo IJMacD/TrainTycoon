@@ -71,6 +71,15 @@ class Train
 		//$train['route'][$train['segment']-1]
 	}
 	
+	function getStations()
+	{
+		// Ideal
+		//return Station::getStation($this->route[$this->segment]);
+		return $this->stations;
+		// progress == 0, segment != 0
+		//$train['route'][$train['segment']-1]
+	}
+	
 	/**
 	 * Fudge - replace with $train->getStation()->getTown()
 	 */

@@ -29,7 +29,10 @@ $CONST['buildings'] = array(	// Rate per year
 	"sheep_farm" => array("wool" => 12),
 	"cotton_mill" => array("wool" => -8, "fabric" => 4),
 	"textiles" => array("fabric" => -4, "clothes" => 2.5),
-	"retail" => array("clothes" => -12)
+	"retail" => array("clothes" => -6),
+	"forest" => array("logs" => 6),
+	"lumber_mill" => array("logs" => -6, "timber" => 6),
+	"carpenter" => array("timber" => -6, "furniture" => 6),
 	);
 $CONST['locos'] = array(
 	1 => array("name" => "Flying Scotsman", "number" => "4472", "configuration" => "4-6-2", "topspeed" => 100, "reliability" => 0.95, "price" => 1000, "start_year" => 1923, "image" => "images/10194-1.gif"),
@@ -44,12 +47,14 @@ $CONST['commodities'] = array(
 	"logs" => array("price" => 1, "car_image" => "images/a_10013_1.gif"),
 	"passengers" => array("price" => 4, "car_image" => "images/10194b.gif"),
 	"wool" => array("price" => 1, "car_image" => "images/4512c.gif"),
-	"wood" => array("price" => 1, "car_image" => "images/a_10013_1.gif")
+	"timber" => array("price" => 1, "car_image" => "images/4543a.gif"),
+	"furniture" => array("price" => 1, "car_image" => "images/4563d.gif"),
 	);
 $CONST['towns'] = array(
 	1 => array("name" => "London", "lat" => 51, "lon" => 1),
 	2 => array("name" => "Birmingham", "lat" => 52, "lon" => -2),
-	3 => array("name" => "Manchester", "lat" => 53, "lon" => -2)
+	3 => array("name" => "Manchester", "lat" => 53, "lon" => -2),
+	4 => array("name" => "Nottingham", "lat" => 52, "lon" => -1),
 	);
 $CONST['station_suffixes'] = array("Central", "Crossing", "Gate", "Junction", "Picadilly", "Priory");
 
