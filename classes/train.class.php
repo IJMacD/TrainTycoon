@@ -16,6 +16,9 @@ class Train
 	
 	// index of route array on way to
 	private $segment = 0;
+
+	// Are we travelling backwards along the route?
+	private $direction = 1;
 	
 	// percentage of current segment completed
 	private $progress = 0;
@@ -56,16 +59,23 @@ class Train
 	{
 		return $this->speed;
 	}
+	public function getDirection()
+	{
+		return $this->direction;
+	}
 	
 	function isAtStation()
 	{
-		return ($this->progress >= 100);
+		return ($this->progress >= 100 || $this->progress <= 0);
 	}
 	
-	function getStation()
+	function getNextStation()
 	{
 		// Ideal
 		//return Station::getStation($this->route[$this->segment]);
+		if ($this->direction < 0) {
+			return $this->stations[$this->segment-1];
+		}
 		return $this->stations[$this->segment];
 		// progress == 0, segment != 0
 		//$train['route'][$train['segment']-1]
@@ -85,12 +95,25 @@ class Train
 	 */
 	function getTown()
 	{
+		if ($this->direction < 0) {
+			return $this->towns[$this->segment-1];
+		}
 		return $this->towns[$this->segment];
 	}
+
 	function getNextTown()
 	{
+		if ($this->direction < 0) {
+			return $this->towns[$this->segment];
+		}
 		return $this->towns[($this->segment+1)%count($this->towns)];
 	}
+
+	function getTowns()
+	{
+		return $this->towns;
+	}
+	
 	
 	/** 
 	 * Modifying functions
@@ -98,18 +121,49 @@ class Train
 	function move($delta)
 	{
 		global $database;
-		$this->progress = $this->progress + $this->speed * $delta;
+		$this->progress = $this->progress + $this->direction * $this->speed * $delta;
 		$database->updateTrain($this->id, 'progress', $this->progress);
 	}
 	
 	function moveToNextStation()
 	{
 		global $database;
+
+		/*
+		 *     Station:    A          B           C
+		 *     Segment:          1          2
+		 * 
+		 */
 		
-		$this->progress -= 100;
-		$this->segment = ($this->segment + 1) % count($this->route);
+		if ($this->direction < 0) {
+			if ($this->segment <= 1) {
+				$this->direction = 1;
+				$this->segment = 1;
+				$this->progress = -$this->progress;
+			}
+			else {
+				$this->progress += 100;
+				$this->segment = ($this->segment - 1) % count($this->route);
+			}
+		} else {
+			global $database;
+			if ($this->segment + 1 >= count($this->route)) {
+				$this->direction = -1;
+				$this->progress = 200 - $this->progress;
+				$this->segment = count($this->route) - 1;
+			} else {
+				$this->progress -= 100;
+				$this->segment = ($this->segment + 1) % count($this->route);
+			}
+		}
+
+		// var_dump($this);
+
+		// exit;
+
 		$database->updateTrain($this->id, 'progress', $this->progress);
-		$database->updateTrain($this->id, 'segment', $this->segment);
+		$database->updateTrain($this->id, 'segment', $this->segment); 
+		$database->updateTrain($this->id, 'direction', $this->direction); 
 	}
 	/**
 	 * Returns whether or not load was successful
@@ -166,6 +220,7 @@ class Train
 			$train->loco_id = $t['loco_id'];
 			$train->progress = $t['progress'];
 			$train->segment = $t['segment'];
+			$train->direction = $t['direction'];
 			$train->speed = $t['speed'];
 			$train->route = $t['route_ids'];
 			// Fudge

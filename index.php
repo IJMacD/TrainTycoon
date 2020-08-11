@@ -15,6 +15,10 @@
 	margin: 3px;
 	padding: 5px;
 }
+.direction-indicator {
+	font-size: 0.8em;
+	font-weight: bold;
+}
 .town_list{
 	width: 200px;
 	border: 1px solid #AAAAFF;

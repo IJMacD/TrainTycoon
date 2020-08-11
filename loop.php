@@ -207,8 +207,18 @@ function updateVideo(){
 		echo '</div>';
 		*/
 		$stations = $train->getStations();
-		$stations[$train->getSegment()] = '<b>' . $stations[$train->getSegment()] . '</b>';
-		echo '<div class="train_list" id="train_'.$train->id.'">'.$train->getName().'</b> ('.implode(", ", $stations).')<br><img src="'.$CONST['locos'][$train->getLocoID()]['image'].'">';
+		foreach ($stations as &$station) {
+			if ($station === $train->getNextStation()) {
+				$station = '<b>' . $station . '</b>';
+				break;
+			}
+		}
+		echo '<div class="train_list" id="train_'.$train->id.'">'
+			. '<b>' . $train->getName() . '</b> '
+			. '('.implode(", ", $stations).') '
+			. '<span class="direction-indicator">'.($train->getDirection() == 1 ? "UP" : "DOWN").'</span>'
+			. '<br>'
+			. '<img src="'.$CONST['locos'][$train->getLocoID()]['image'].'">';
 		foreach($train->getCars() as $car){
 			echo '<img src="'.$CONST['commodities'][$car]['car_image'].'" title="'.$car.'">';
 		}
@@ -217,11 +227,11 @@ function updateVideo(){
 			if($train->getSegment() == 0)
 				echo '<br>'.$lang['en']['stopped'];
 			else
-				echo '<br>'.$lang['en']['stopped_at'].' '.$train->getStation();;
+				echo '<br>'.$lang['en']['stopped_at'].' '.$train->getNextStation();;
 		}
 		else
 		{
-			echo '<br>'.$lang['en']['on_way_to'].' '.$train->getStation();
+			echo '<br>'.$lang['en']['on_way_to'].' '.$train->getNextStation();
 
 			$cars = $train->getCars();
 			if (count($cars)) {
@@ -296,7 +306,7 @@ function outputJSON()
 		$train['station'] = array();
 		$train['station']['id'] = 0;
 		$train['station']['town'] = 0;
-		$train['station']['name'] = $_train->getStation();
+		$train['station']['name'] = $_train->getNextStation();
 		
 		$result['trains'][] = $train;
 	}

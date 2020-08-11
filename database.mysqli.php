@@ -153,12 +153,35 @@ class DB
 			if(!isset($this->commodities[$town_id][$commodity]))
 			{
 				$this->log('Commodity specified don\'t have it', 2);
-				$this->commodities[$town_id][$commodity] = array('name' => $commodity, 'supply' => 0, 'demand' => 0, 'surplus' => 0, 'price' => 0);
+				$c = makeComodity($commodity);
+				$price = $c['price'];
+				$supply = $c['supply'];
+				$demand = $c['demand'];
+				$this->setCommodity($town_id, $commodity, $supply, $demand, $price);
 			}
 			else
 				$this->log('Commodity specified do have it', 2);
+
 			return $this->commodities[$town_id][$commodity];
 		}
+	}
+
+	function setCommodity ($town_id, $commodity, $supply, $demand, $price) {
+		
+		$q = "INSERT INTO `".TABLE_commodities."` (`town_id`,`commodity`,`surplus`,`demand`,`price`) "
+			."VALUES ('$town_id','$commodity','$supply','$demand','$price') "
+			."ON DUPLICATE KEY UPDATE `surplus` = '$supply', `demand` = '$demand', `price` = '$price'";
+		$this->query($q);
+
+		if(!isset($this->commodities)) $this->commodities = array();
+		if(!isset($this->commodities[$town_id])) $this->commodities[$town_id] = array();
+		if(!isset($this->commodities[$town_id][$commodity])) $this->commodities[$town_id][$commodity] = array();
+
+		$this->commodities[$town_id][$commodity]['name']	= $commodity;
+		$this->commodities[$town_id][$commodity]['surplus']	= $supply - $demand;
+		$this->commodities[$town_id][$commodity]['supply']	= $supply;
+		$this->commodities[$town_id][$commodity]['demand']	= $demand;
+		$this->commodities[$town_id][$commodity]['price']	= $price;
 	}
 	
 	function setData($key, $value){
@@ -236,25 +259,14 @@ class DB
 			$this->log(($dsurplus > 0 ? "SELL" : "BUY") . ": [$commodity ($town_id)] Final: Price $price, Supply $supply, Demand $demand");
 			//$price = max(0, $price);
 		}else{
-			$price = $CONST['commodities'][$commodity]['price'];
-			$price *= (rand(16, 25) / 20);
-			$supply = 1000 + $dsurplus;
-			$demand = 1000 - $dsurplus;
-			$return_value = $price * $dsurplus;
+			$c = makeComodity($commodity, $dsurplus);
+			$price = $c['price'];
+			$supply = $c['supply'];
+			$demand = $c['demand'];
+			$return_value = $c['price'] * $dsurplus;
 		}
 		
-		$q = "INSERT INTO `".TABLE_commodities."` (`town_id`,`commodity`,`surplus`,`demand`,`price`) "
-			."VALUES ('$town_id','$commodity','$supply','$demand','$price') "
-			."ON DUPLICATE KEY UPDATE `surplus` = '$supply', `demand` = '$demand', `price` = '$price'";
-		$this->query($q);
-		if(!isset($this->commodities)) $this->commodities = array();
-		if(!isset($this->commodities[$town_id])) $this->commodities[$town_id] = array();
-		if(!isset($this->commodities[$town_id][$commodity])) $this->commodities[$town_id][$commodity] = array();
-		$this->commodities[$town_id][$commodity]['name']	= $commodity;
-		$this->commodities[$town_id][$commodity]['surplus']	= $supply - $demand;
-		$this->commodities[$town_id][$commodity]['supply']	= $supply;
-		$this->commodities[$town_id][$commodity]['demand']	= $demand;
-		$this->commodities[$town_id][$commodity]['price']	= $price;
+		$this->setCommodity($town_id, $commodity, $supply, $demand, $price);
 
 		return $return_value;
 	}
@@ -273,3 +285,12 @@ class DB
 	}
 }
 $database = new DB;
+
+function makeComodity ($commodity, $surplus=0) {
+	global $CONST;
+
+	$price = $CONST['commodities'][$commodity]['price'];
+	$price *= (rand(16, 25) / 20);
+
+	return array('name' => $commodity, 'supply' => 1000 + $surplus / 2, 'demand' => 1000 - $surplus / 2, 'surplus' => $surplus, 'price' => $price);
+}
