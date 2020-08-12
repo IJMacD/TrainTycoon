@@ -58,7 +58,6 @@ var game;
 const loopingBtn = document.getElementById('looping-btn');
 loopingBtn.addEventListener("click", () => looping ? stopLoop() : startLoop());
 loopingBtn.value = looping ? "Stop Loop" : "Start Loop";
-var mutex = false;
 function stopLoop () {
 	looping = false;
 	loopingBtn.value = "Start Loop";
@@ -72,11 +71,21 @@ function run () {
 	update();
 	updateImage();
 }
+function makeMutex () {
+	let flag = false;
+	const done = () => flag = false; 
+	return function mutex (fn) {
+		if (!flag) {
+			flag = true;
+			fn(done);
+		}
+	}
+}
+const mutex = makeMutex();
+
 function update()
 {
-	if (!mutex) {
-		mutex = true;
-
+	mutex(done => {
 		url = 'loop.php';
 		count = $('input:checkbox:checked').length;
 		if(count)
@@ -84,13 +93,13 @@ function update()
 		
 		// console.log(new Date().toISOString() + " Loading " + url);
 		$('#trains').load(url, () => {
-			mutex = false;
 			// Check after delay if looping has been set/unset in JS event loop
 			setTimeout(() => (looping && update()), 1000); 
+			done();
 		});
 
 		//$.getJSON('loop.php?out=json', function(data){game=data});
-	}
+	});
 }
 const displayImg = document.getElementById('map');
 const holder = document.getElementById('map-holder');
