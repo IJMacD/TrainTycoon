@@ -72,16 +72,7 @@ class DB
 			$result = $this->query($q);
 			if($result && $result->num_rows){
 				while($train = $result->fetch_assoc()){
-					$train['route'] = array();
-					$q = "SELECT `b`.`id`,`b`.`Name`,`b`.`town_id` FROM `routes` a, `stations` b WHERE `a`.`train_id` = '".$train['id']."' AND `b`.`id` = `a`.`station_id` ORDER BY `a`.`order` ASC";
-					$result_2 = $this->query($q);
-					if($result_2 && $result_2->num_rows){
-						while($stop = $result_2->fetch_assoc()){
-							$train['route_ids'][] = $stop['id'];
-							$train['route'][] = $stop['Name'];
-							$train['town_ids'][] = $stop['town_id'];
-						}
-					}
+					$train['route'] = $this->getRoute($train['id']);
 					$this->trains[$train['id']] = $train;
 				}
 			}
@@ -297,6 +288,25 @@ class DB
 		}
 		$q = "INSERT INTO `".TABLE_locos."` (`id`, `active`) VALUES ".implode(", ", $values);
 		$this->query($q);
+	}
+
+	function getRoute ($route_id) {
+		$q = "SELECT
+			`station_id`,
+				`length`,
+				`stations`.`Name` AS station_name,
+				`town_id`,
+				`towns`.`Name` AS town_name,
+				`towns`.`lat` AS lat,
+				`towns`.`lon` AS lon,
+				population
+			FROM routes
+				JOIN stations ON routes.station_id = stations.id
+				JOIN towns ON stations.town_id = towns.id
+			WHERE train_id = $route_id
+			ORDER BY `order`";
+		
+		return $this->query($q)->fetch_all(MYSQLI_ASSOC);
 	}
 }
 $database = new DB;

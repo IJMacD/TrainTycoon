@@ -63,8 +63,7 @@ function updateState(){
 		//	$g->updateTrain($train['id'], 'speed', $CONST['locos'][$train['loco_id']]['topspeed']);
 			//print_r($train);
 		// Train's Reached Destination
-		// (Train may have reached multiple stations in the delta)
-		while($train->isAtStation())
+		if ($train->isReadyToUnload())
 		{
 			$town_id = $train->getTown();
 
@@ -78,6 +77,12 @@ function updateState(){
 				$wealth = $g->getData('wealth');
 				$g->setData('wealth', $wealth + $profit);
 			}
+		}
+
+		if ($train->isReadyToLoad()) 
+		{
+
+			$town_id = $train->getTown();
 			
 			//turnaround
 			$train->moveToNextStation();
@@ -196,7 +201,8 @@ function updatePhysics(){
 	if($g->State() != STATE_PAUSED){
 		$delta = $g->delta / SPEED_SCALE * $CONST['game_speeds'][$g->State()];
 		foreach($g->getTrains() as $train){
-			$train->move($delta);
+			if ($train->isLoading()) $train->waitLoading($g->dsimtime);
+			else if ($train->isRunning()) $train->move($delta);
 		}
 	}
 }
@@ -236,12 +242,15 @@ function updateVideo(){
 		foreach($train->getCars() as $car){
 			echo '<img src="'.$CONST['commodities'][$car]['car_image'].'" title="'.$car.'">';
 		}
-		if($train->getProgress() == 0)
+
+		if($train->isAtStation())
 		{
-			if($train->getSegment() == 0)
+			if ($train->getSegment() == 0)
 				echo '<br>'.$lang['en']['stopped'];
+			// else if ($train->isLoading())
+			// 	echo '<br>'.$lang['en']['stopped_at'].' '.$train->getNextStation() . " (Loading Time: " . $train->getLoadingTime() . ")";
 			else
-				echo '<br>'.$lang['en']['stopped_at'].' '.$train->getNextStation();;
+				echo '<br>'.$lang['en']['stopped_at'].' '.$train->getNextStation() . " (Loading Time: " . $train->getLoadingTime() . ")";
 		}
 		else
 		{

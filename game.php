@@ -26,11 +26,12 @@ class Game
 		$this->lasttime = $this->getData('lasttime');
 		$time = microtime(true);
 		$this->delta = min($time - $this->lasttime, $MAX_DELTA);
-		$database->log('Delta: '.$this->delta);
+		$database->log('Delta: '.$this->delta);	
 		$this->setData('lasttime', $time);
 		$this->dsimtime = $this->delta / TIME_SCALE * $this->Speed();
+		$database->log("Delta (Sim): " . $this->dsimtime, 2);
 	}
-	
+
 	function getData($key){
 		global $database;
 		return $database->getData($key);
@@ -108,11 +109,11 @@ class Game
 		return $database->updateCommodities($town_id, $commodity, $dsurplus);
 	}
 
-	function break () {
+	function break ($msg = "") {
 		global $database;
 		$this->hasBreak = true;
 		$this->State(0);
-		$database->log("BREAK");
+		$database->log(strlen($msg) > 0 ? "BREAK - " . $msg : "BREAK");
 	}
 }
 ?>

@@ -69,3 +69,5 @@ $CONST['game_speeds'][STATE_FAST] = 2;
 $CONST['game_speeds'][STATE_VFAST] = 5;
 
 $CONST['defaults'] = array("date" => "1930-01-01", "simstamp" => strtotime("1930-01-01"), "gameState" => STATE_PAUSED, "lasttime" => 0, "wealth" => 1000);
+
+$CONST['TRAIN_LOADING_TIME'] = 10 / TIME_SCALE; // Abt 10 seconds
