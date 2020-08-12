@@ -86,10 +86,20 @@ const mutex = makeMutex();
 function update()
 {
 	mutex(done => {
-		url = 'loop.php';
+		let url = 'loop.php';
+		const params = [];
+
+		if (window.location.hash.length > 2) {
+			params.push(window.location.hash.substring(1));
+		}
+
 		count = $('input:checkbox:checked').length;
 		if(count)
-			url += '?debug='+count;
+			params.push('debug='+count);
+
+		if (params.length) {
+			url += "?" + params.join("&");
+		}
 		
 		// console.log(new Date().toISOString() + " Loading " + url);
 		$('#trains').load(url, () => {

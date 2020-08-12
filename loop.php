@@ -211,7 +211,7 @@ function updateScore(){
 
 // Output XML
 function updateVideo(){
-	global $g, $CONST, $lang;
+	global $g, $CONST, $lang, $database;
 	if($g->State() == STATE_PAUSED) echo '<h1 style="color: red;">'.$lang['en']['paused'].'</h1>';
 	echo "<p>Date: ".date("Y-m-d", $g->getData('simstamp')) . "</p>";
 	echo "<p>Wealth: ". sprintf('$%.2f', $g->getData('wealth')) . "</p>";
@@ -261,15 +261,44 @@ function updateVideo(){
 		echo '<br><img src="images/progress.gif" height="1" width="'.$train->getProgress().'%">';
 		echo '</div>';
 	}
-	foreach($g->getTowns() as $town){
-		echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['Name'].'</b><br>';
-		echo '<table><tr><th>Name</th><th>Quantity</th><th>Price</th></tr>';
-		foreach($g->getCommodities($town['id']) as $commodity){
-			echo '<tr><td>'.$commodity['name'].'</td><td>'.sprintf('%.3f', $commodity['surplus']).'</td><td>$'.sprintf('%.2f', $commodity['price']).'</td></tr>';
+
+	$show = isset($_GET['view']) ? $_GET['view'] : "towns";
+	$showOptions = ["Towns","Commodities"]; 
+
+	echo '<p>';
+	foreach ($showOptions as $o) {
+		$t = strtolower($o);
+
+		if ($show == $t) echo $o . ' ';
+		else {
+			echo '<a href="#view='.$t.'">'.$o.'</a> ';
 		}
-		echo '</table></div>';
 	}
-	if(count($g->getTrains()) < 1) $lang['en']['no_trains'];
+	echo '</p>';
+
+	switch ($show) {
+		case "towns":
+			foreach($g->getTowns() as $town){
+				echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['Name'].'</b><br>';
+				echo '<table><tr><th>Name</th><th>Quantity</th><th>Price</th></tr>';
+				foreach($g->getCommodities($town['id']) as $commodity){
+					echo '<tr><td>'.$commodity['name'].'</td><td>'.sprintf('%.3f', $commodity['surplus']).'</td><td>$'.sprintf('%.2f', $commodity['price']).'</td></tr>';
+				}
+				echo '</table></div>';
+			}
+			if(count($g->getTrains()) < 1) $lang['en']['no_trains'];
+		break;
+		case "commodities":
+			foreach ($database->getCommodityTypes() as $commodity) {
+				echo '<div id="commodity_'.$commodity.'" class="town_list"><b>'.ucfirst($commodity).'</b><br>';
+				echo '<table><tr><th>Town</th><th>Surplus</th><th>Price</th></tr>';
+				foreach($database->getCommodityList($commodity) as $c){
+					echo '<tr><td>'.$g->getTowns($c['town_id'])['Name'].'</td><td>'.sprintf('%.3f', $c['surplus']).'</td><td>$'.sprintf('%.2f', $c['price']).'</td></tr>';
+				}
+				echo '</table></div>';
+			}
+		break;
+	}
 
 	if ($g->hasBreak)
 	{

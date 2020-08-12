@@ -183,6 +183,19 @@ class DB
 		$this->commodities[$town_id][$commodity]['demand']	= $demand;
 		$this->commodities[$town_id][$commodity]['price']	= $price;
 	}
+
+	function getCommodityList ($commodity) {
+		$q = "SELECT `town_id`,`surplus` as 'supply',`surplus` - `demand` as 'surplus',`demand`,`price` FROM `".TABLE_commodities."` WHERE commodity = '$commodity' ORDER BY `price` DESC";
+		return $this->query($q)->fetch_all(MYSQLI_ASSOC);
+	}
+
+	function getCommodityTypes () {
+		$q = "SELECT `commodity` FROM `" . TABLE_commodities . "` GROUP BY `commodity` ORDER BY `commodity`";
+		$r =  $this->query($q);
+		$out = [];
+		while($commodity = $r->fetch_row()) $out[] = $commodity[0];
+		return $out;
+	}
 	
 	function setData($key, $value){
 		$q = "INSERT INTO `".TABLE_data."` (`key`, `value`) VALUES ('$key', '$value') ON DUPLICATE KEY UPDATE `value` = '$value'";
