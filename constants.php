@@ -23,17 +23,20 @@ define("TABLE_towns", "towns");
 define("TABLE_stations", "stations");
 define("TABLE_commodities", "commodities");
 
-$COSNT = array();
+$CONST = array();
 
 $CONST['buildings'] = array(	// Rate per year
 	"sheep_farm" => array("wool" => 12),
-	"cotton_mill" => array("wool" => -8, "fabric" => 4),
-	"textiles" => array("fabric" => -4, "clothes" => 2.5),
-	"retail" => array("clothes" => -6, "furniture" => -8),
+	"textiles" => array("wool" => -8, "fabric" => 4),
+	"tailor" => array("fabric" => -4, "clothes" => 2.5),
 	"forest" => array("logs" => 6),
 	"lumber_mill" => array("logs" => -6, "timber" => 6),
 	"carpenter" => array("timber" => -6, "furniture" => 6),
 	);
+$CONST['consumers'] = array(
+	"furniture" => 2,
+	"clothes" => 2,
+);
 $CONST['locos'] = array(
 	1 => array("name" => "Flying Scotsman", "number" => "4472", "configuration" => "4-6-2", "topspeed" => 100, "reliability" => 0.95, "price" => 1000, "start_year" => 1923, "image" => "images/10194-1.gif"),
 	2 => array("name" => "Mallard", "number" => "4468", "configuration" => "4-6-2", "topspeed" => 100, "reliability" => 0.85, "price" => 800, "start_year" => 1938, "image" => "images/kt203.gif")
@@ -56,7 +59,7 @@ $CONST['towns'] = array(
 	3 => array("name" => "Manchester", "lat" => 53, "lon" => -2),
 	4 => array("name" => "Nottingham", "lat" => 52, "lon" => -1),
 	);
-$CONST['station_suffixes'] = array("Central", "Crossing", "Gate", "Junction", "Picadilly", "Priory");
+$CONST['station_suffixes'] = array("Central", "Crossing", "Gate", "Junction", "Picadilly", "Priory", "East", "West", "North", "South", "Gap", "New Street", "High Street", "Halt");
 
 $CONST['game_speeds'][STATE_PAUSED] = 0;
 $CONST['game_speeds'][STATE_VSLOW] = 0.2;
@@ -65,5 +68,4 @@ $CONST['game_speeds'][STATE_NORM] = 1;
 $CONST['game_speeds'][STATE_FAST] = 2;
 $CONST['game_speeds'][STATE_VFAST] = 5;
 
-$CONST['defaults'] = array("date" => "1930-01-01", "simstamp" => strtotime("1930-01-01"), "gameState" => STATE_PAUSED, "lasttime" => 0);
-?>
+$CONST['defaults'] = array("date" => "1930-01-01", "simstamp" => strtotime("1930-01-01"), "gameState" => STATE_PAUSED, "lasttime" => 0, "wealth" => 1000);

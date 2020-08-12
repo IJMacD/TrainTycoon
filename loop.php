@@ -147,7 +147,6 @@ function updateState(){
 		foreach($g->getBuildings() as $building)
 		{
 			$town = $g->getTowns($building['town_id']);
-			$town_commodities = $g->getCommodities($building['town_id']);
 			$has_all_consumables = true;
 
 			foreach($CONST['buildings'][$building['type']] as $commodity => $rate)
@@ -170,6 +169,22 @@ function updateState(){
 				{
 					$g->updateCommodities($building['town_id'], $commodity, ($g->dsimtime * $rate));
 				}
+			}
+		}
+	}
+
+	// update population based consumption
+	foreach ($g->getTowns() as $town) {
+		$pop = $town['population'];
+		$lpop = log($pop);
+		
+		foreach ($CONST['consumers'] as $commodity => $rate) {
+			$c = $g->getCommodities($town['id'], $commodity);
+			$quantity = $g->dsimtime * $rate * $lpop * 0.1;
+			$database->log("Trying to consume $quantity of $commodity at {$town['Name']}", 3);
+
+			if($quantity <= $c['surplus']) {
+				$g->updateCommodities($town['id'], $commodity, -$quantity);
 			}
 		}
 	}

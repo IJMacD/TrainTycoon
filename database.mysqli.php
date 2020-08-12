@@ -292,7 +292,16 @@ function makeComodity ($commodity, $surplus=0) {
 	global $CONST;
 
 	$price = $CONST['commodities'][$commodity]['price'];
-	$price *= 1 + rand(-1000, 1000) / 2000;
+	$price *= binom(1, 0.25);
 
-	return array('name' => $commodity, 'supply' => 100 + $surplus, 'demand' => 100 - $surplus, 'surplus' => $surplus, 'price' => $price);
+	return array('name' => $commodity, 'supply' => 200 + $surplus, 'demand' => 200 - $surplus, 'surplus' => $surplus, 'price' => $price);
+}
+
+function binom ($centre = 0.5, $range = 1, $iter = 3) {
+	$acc = 0;
+	for ($i = 0; $i < $iter; $i++) $acc += rand(0, 100000) / 100000;
+	$r = $acc / $iter;
+	$r += $centre - 0.5;
+	$r *= $range;
+	return $r;
 }
