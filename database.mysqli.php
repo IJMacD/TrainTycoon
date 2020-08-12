@@ -191,7 +191,8 @@ class DB
 	}
 	
 	function updateTrain($id, $key, $value){
-		$q = "UPDATE `".TABLE_trains."` SET `$key` = '$value' WHERE `id` = '$id'";
+		$v = $value === NULL ? "NULL" : "'$value'";
+		$q = "UPDATE `".TABLE_trains."` SET `$key` = $v WHERE `id` = '$id'";
 		$this->query($q);
 		$this->trains[$id][$key] = $value;
 	}
@@ -238,7 +239,8 @@ class DB
 				$price *= (rand(16, 25) / 20);
 				$surplus = $dsurplus;
 			}*/
-			$this->log(($dsurplus > 0 ? "SELL" : "BUY") . ": [$commodity ($town_id)] Initial: Price $price, Supply $supply, Demand $demand");
+			$t = $this->getTowns($town_id);
+			$this->log(($dsurplus > 0 ? "SELL" : "BUY") . ": [$commodity x ".abs($dsurplus)."] @ $$price, Supply $supply, Demand $demand, From {$t['Name']}");
 			if($dsurplus > 0)
 			{
 				$supply += $dsurplus;
@@ -256,7 +258,7 @@ class DB
 			// Q === surplus
 			// dP = m_D.dQ
 			// $m_D = -1;
-			$this->log(($dsurplus > 0 ? "SELL" : "BUY") . ": [$commodity ($town_id)] Final: Price $price, Supply $supply, Demand $demand");
+			$this->log("New Price for [$commodity] at {$t['Name']}: Price $price, Supply $supply, Demand $demand");
 			//$price = max(0, $price);
 		}else{
 			$c = makeComodity($commodity, $dsurplus);
@@ -290,7 +292,7 @@ function makeComodity ($commodity, $surplus=0) {
 	global $CONST;
 
 	$price = $CONST['commodities'][$commodity]['price'];
-	$price *= (rand(16, 25) / 20);
+	$price *= 1 + rand(-1000, 1000) / 2000;
 
-	return array('name' => $commodity, 'supply' => 1000 + $surplus / 2, 'demand' => 1000 - $surplus / 2, 'surplus' => $surplus, 'price' => $price);
+	return array('name' => $commodity, 'supply' => 100 + $surplus, 'demand' => 100 - $surplus, 'surplus' => $surplus, 'price' => $price);
 }

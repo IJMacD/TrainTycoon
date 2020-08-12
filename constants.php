@@ -29,7 +29,7 @@ $CONST['buildings'] = array(	// Rate per year
 	"sheep_farm" => array("wool" => 12),
 	"cotton_mill" => array("wool" => -8, "fabric" => 4),
 	"textiles" => array("fabric" => -4, "clothes" => 2.5),
-	"retail" => array("clothes" => -6),
+	"retail" => array("clothes" => -6, "furniture" => -8),
 	"forest" => array("logs" => 6),
 	"lumber_mill" => array("logs" => -6, "timber" => 6),
 	"carpenter" => array("timber" => -6, "furniture" => 6),

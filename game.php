@@ -1,4 +1,7 @@
 <?php
+
+$MAX_DELTA = 10;
+
 class Game
 {
 	private $data = array();
@@ -13,13 +16,16 @@ class Game
 	var $lasttime;
 	var $delta;
 	var $dsimtime;
+
+	var $hasBreak = false;
 	
 	function init()
 	{
-		global $database;
+		global $database, $MAX_DELTA;
+		
 		$this->lasttime = $this->getData('lasttime');
 		$time = microtime(true);
-		$this->delta = $time - $this->lasttime;
+		$this->delta = min($time - $this->lasttime, $MAX_DELTA);
 		$database->log('Delta: '.$this->delta);
 		$this->setData('lasttime', $time);
 		$this->dsimtime = $this->delta / TIME_SCALE * $this->Speed();
@@ -100,6 +106,13 @@ class Game
 	{
 		global $database;
 		return $database->updateCommodities($town_id, $commodity, $dsurplus);
+	}
+
+	function break () {
+		global $database;
+		$this->hasBreak = true;
+		$this->State(0);
+		$database->log("BREAK");
 	}
 }
 ?>

@@ -40,7 +40,7 @@
 </style>
 <input type="button" onclick="$('#trains').load('loop.php?state=play')" value="Play" />
 <input type="button" onclick="$('#trains').load('loop.php?state=pause')" value="Pause" />
-<input type="button" onclick="looping = !looping; looping && run(); this.value=(this.value=='Stop Loop')?'Start Loop':'Stop Loop';" value="Stop Loop"/>
+<input type="button" id="looping-btn" value="Start Loop"/>
 <input type="button" onclick="run();" value="Step"/>
 <label for="debug">Debug</label>
 <input type="checkbox" name="debug1" id="debug1" />
@@ -53,23 +53,44 @@
 	</div>
 </row>
 <script type="text/javascript">
-var looping = true;
+var looping = false;
 var game;
+const loopingBtn = document.getElementById('looping-btn');
+loopingBtn.addEventListener("click", () => looping ? stopLoop() : startLoop());
+loopingBtn.value = looping ? "Stop Loop" : "Start Loop";
+var mutex = false;
+function stopLoop () {
+	looping = false;
+	loopingBtn.value = "Start Loop";
+}
+function startLoop () {
+	looping = true;
+	loopingBtn.value = "Stop Loop";
+	run();
+}
 function run () {
 	update();
 	updateImage();
 }
 function update()
 {
-	url = 'loop.php';
-	count = $('input:checkbox:checked').length;
-	if(count)
-		url += '?debug='+count;
-	
-	$('#trains').load(url);
+	if (!mutex) {
+		mutex = true;
 
-	//$.getJSON('loop.php?out=json', function(data){game=data});
-	if (looping) setTimeout(update, 1000);
+		url = 'loop.php';
+		count = $('input:checkbox:checked').length;
+		if(count)
+			url += '?debug='+count;
+		
+		// console.log(new Date().toISOString() + " Loading " + url);
+		$('#trains').load(url, () => {
+			mutex = false;
+			// Check after delay if looping has been set/unset in JS event loop
+			setTimeout(() => (looping && update()), 1000); 
+		});
+
+		//$.getJSON('loop.php?out=json', function(data){game=data});
+	}
 }
 const displayImg = document.getElementById('map');
 const holder = document.getElementById('map-holder');

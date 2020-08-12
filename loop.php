@@ -67,76 +67,77 @@ function updateState(){
 		while($train->isAtStation())
 		{
 			$town_id = $train->getTown();
-			
+
+			$database->log("{$train->getName()} arrived at " . $g->getTowns($town_id)['Name']);
+
 			//unload
 			$unloaded_cars = $train->unload();
-			foreach($unloaded_cars as $car)
+			foreach($unloaded_cars as $commodity => $count)
 			{
-				$profit = $g->updateCommodities($town_id, $car, +1);
+				$profit = $g->updateCommodities($town_id, $commodity, $count);
 				$wealth = $g->getData('wealth');
 				$g->setData('wealth', $wealth + $profit);
 			}
 			
+			//turnaround
+			$train->moveToNextStation();
+			
 			//load
-			$next_town = $train->getNextTown();
-			$success = true;
-			$tries = 4;
-			while($tries>0){
+			$next_town = $train->getTown();
+			$database->log("{$train->getName()} @ " . $g->getTowns($town_id)['Name'] . ' loading for ' . $g->getTowns($next_town)['Name']);
+			$full = false;
+			while (!$full) {
 				$commodities = $g->getCommodities($town_id);
 				$biggest_price_difference = 0;
 				$best_commodity = -1;
+				$database->log("Looking for best deals");
+				$MIN_PROFIT = 0.05;
 				foreach($commodities as $k => $commodity)
 				{
 					$dest_commodity = $g->getCommodities($next_town, $commodity['name']);
 
-					$database->log('['.$commodity['name'].'] Dest Price: '. $dest_commodity['price'].' Price: '.$commodity['price']);
+					$database->log('['.$commodity['name']."] Current: " . sprintf("$%.4f", $commodity['price']) . " Dest: ". sprintf("$%.4f", $dest_commodity['price']) . " Difference: " . sprintf("$%.4f", $dest_commodity['price'] - $commodity['price']) . " Available: " . sprintf("%.02f", $commodity['surplus']));
 
 					$price_difference = $dest_commodity['price'] - $commodity['price'];
 
-					if($price_difference > $biggest_price_difference && $commodity['surplus'] >= 1){
+					if($price_difference - $MIN_PROFIT > $biggest_price_difference && $commodity['surplus'] >= 1){
 						$best_commodity = $k;
 						$biggest_price_difference = $price_difference;
 					}
 				}
 
 				// We only want to load it if price is favourable
-				if($biggest_price_difference > 0 && $best_commodity >= 0)
+				if($biggest_price_difference <= 0)
 				{
-					$commodity_to_load = $commodities[$best_commodity];
-					$ctl = $commodity_to_load;
+					$database->log("Nothing available with profit more than ". m($MIN_PROFIT));
+					break;
+				}
 
-					$database->log('Biggest Difference: ['.$ctl['name'].'] $'.$biggest_price_difference);
+				$commodity_to_load = $commodities[$best_commodity];
+				$ctl = $commodity_to_load;
 
-					$surplus = $commodity_to_load['surplus'];
-					$database->log('Surplus: '.$surplus);
-					while($surplus >= 1 && $success)
-					{
-						$success = $train->load($commodity_to_load['name']);
-						$surplus--;
+				$database->log('Biggest Difference: ['.$ctl['name'].'] $'.$biggest_price_difference);
+
+				$surplus = $commodity_to_load['surplus'];
+				$database->log('Surplus: '.$surplus);
+				$loaded = 0;
+				while($loaded + 1 <= $commodity_to_load['surplus'])
+				{
+					if ($train->load($commodity_to_load['name'])) $loaded++;
+					else {
+						$full = true;
+						break;
 					}
-					unset($commodities[$k]);
-					$loaded = $commodity_to_load['surplus'] - $surplus;
-					$database->log('Loaded '.$loaded.' '.$commodity_to_load['name']);
-					$cost = $g->updateCommodities($town_id, $commodity_to_load['name'], -$loaded);
+				}
+				
+				$database->log('Loaded '.$loaded.' '.$commodity_to_load['name']);
+				$cost = $g->updateCommodities($town_id, $commodity_to_load['name'], -$loaded);
 
-					$wealth = $g->getData('wealth');
-					$g->setData('wealth', $wealth + $cost);
-				}
-				else {
-					$success = false;
-				}
-				if(!$success)
-				{
-					$tries = 0;
-				}
-				// Supposed to loop through commodities finding highest profit margin each time
-				// until all cars are full.
-				// TODO: does not work - the line below is only to break the loop while the code is broken
-				$tries--;
+				$wealth = $g->getData('wealth');
+				$g->setData('wealth', $wealth + $cost);
 			}
-			
-			//turnaround
-			$train->moveToNextStation();
+
+			// $g->break();
 		}
 	}
     
@@ -148,19 +149,21 @@ function updateState(){
 			$town = $g->getTowns($building['town_id']);
 			$town_commodities = $g->getCommodities($building['town_id']);
 			$has_all_consumables = true;
+
 			foreach($CONST['buildings'][$building['type']] as $commodity => $rate)
 			{
-				// Town is allowed to go one unit of 'rate' into debt
 				// check all negative rates
 				//		if it is producing it is fine
 				// if it is consuming check there is stock in the town to accomodate
 				$c = $g->getCommodities($building['town_id'], $commodity);
-				if($rate < 0 && $c['surplus'] < 0)
+				$needs = $g->dsimtime * -$rate;
+				if($rate < 0 && $c['surplus'] < $needs)
 				{
 					$has_all_consumables = false;
 					break;
 				}
 			}
+
 			if($has_all_consumables)
 			{
 				foreach($CONST['buildings'][$building['type']] as $commodity => $rate)
@@ -207,12 +210,8 @@ function updateVideo(){
 		echo '</div>';
 		*/
 		$stations = $train->getStations();
-		foreach ($stations as &$station) {
-			if ($station === $train->getNextStation()) {
-				$station = '<b>' . $station . '</b>';
-				break;
-			}
-		}
+		$i = $train->getNextIndex();
+		$stations[$i] = '<b>' . $stations[$i] . '</b>';
 		echo '<div class="train_list" id="train_'.$train->id.'">'
 			. '<b>' . $train->getName() . '</b> '
 			. '('.implode(", ", $stations).') '
@@ -256,6 +255,11 @@ function updateVideo(){
 		echo '</table></div>';
 	}
 	if(count($g->getTrains()) < 1) $lang['en']['no_trains'];
+
+	if ($g->hasBreak)
+	{
+		echo '<script>stopLoop();</script>';
+	}
 }
 function outputJSON()
 {
@@ -332,4 +336,7 @@ function outputJSON()
 	
 	echo json_encode($result);
 }
-?>
+
+function m ($value) {
+	return sprintf("$%.02f", $value);
+}

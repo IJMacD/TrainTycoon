@@ -73,12 +73,14 @@ class Train
 	{
 		// Ideal
 		//return Station::getStation($this->route[$this->segment]);
-		if ($this->direction < 0) {
-			return $this->stations[$this->segment-1];
-		}
-		return $this->stations[$this->segment];
+		return $this->stations[$this->getNextIndex()];
 		// progress == 0, segment != 0
 		//$train['route'][$train['segment']-1]
+	}
+	
+	function getNextIndex()
+	{
+		return $this->direction < 0 ? $this->segment - 1 : $this->segment;
 	}
 	
 	function getStations()
@@ -95,10 +97,7 @@ class Train
 	 */
 	function getTown()
 	{
-		if ($this->direction < 0) {
-			return $this->towns[$this->segment-1];
-		}
-		return $this->towns[$this->segment];
+		return $this->towns[$this->getNextIndex()];
 	}
 
 	function getNextTown()
@@ -187,11 +186,19 @@ class Train
 	function unload()
 	{
 		global $database;
-		$cars = $this->cars;
+
+		$out = array();
+		
+		foreach ($this->cars as $car) {
+			if (!isset($out[$car])) $out[$car] = 1;
+			else $out[$car]++;
+		}
+
 		$this->cars = array();
 		for($i = 1; $i <= 8; $i++)
-			$database->updateTrain($this->id, 'Car_'.$i, "");
-		return $cars;
+			$database->updateTrain($this->id, 'Car_'.$i, NULL);
+
+		return $out;
 	}
 	
 	/**
