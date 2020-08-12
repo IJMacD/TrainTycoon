@@ -1,0 +1,18 @@
+# Don't copy git related files
+exclude .git
+exclude .gitignore
+exclude .gitattributes
+
+# Don't copy local development config
+exclude env
+exclude res
+
+# Don't copy development source files
+exclude deploy
+exclude .vscode
+exclude *.xlsx
+exclude *.sql
+exclude *.pdn
+
+# Don't copy local cache/data directories
+exclude data
