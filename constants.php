@@ -28,10 +28,14 @@ $CONST = array();
 $CONST['buildings'] = array(	// Rate per year
 	"sheep_farm" => array("wool" => 12),
 	"textiles" => array("wool" => -8, "fabric" => 4),
-	"tailor" => array("fabric" => -4, "clothes" => 2.5),
+	"tailor" => array("fabric" => -4, "clothing" => 2.5),
 	"forest" => array("logs" => 6),
-	"lumber_mill" => array("logs" => -6, "timber" => 6),
-	"carpenter" => array("timber" => -6, "furniture" => 6),
+	"lumber_mill" => array("logs" => -6, "lumber" => 6),
+	"carpenter" => array("lumber" => -6, "furniture" => 6),
+	"distillery" => array("grain" => -6, "alcohol" => 6),
+	"post_office" => array("mail" => 2),
+	"farm" => array("grain" => 2, "livestock" => 1),
+	"abattoir" => array("livestock" => -1, "meat" => 9),
 	);
 $CONST['consumers'] = array(
 	"furniture" => 2,
@@ -43,7 +47,7 @@ $CONST['locos'] = array(
 	);
 $CONST['commodities'] = array(
 	"alcohol" => array("price" => 5, "car_image" => "images/a_10017_1.gif"),
-	"clothes" => array("price" => 3, "car_image" => "images/10194b.gif"),
+	"clothing" => array("price" => 3, "car_image" => "images/10194b.gif"),
 	"coal" => array("price" => 3, "car_image" => "images/10183c.gif"),
 	"cotton" => array("price" => 1, "car_image" => "images/4512c.gif"),
 	"fabric" => array("price" => 2, "car_image" => "images/a_10017_1.gif"),
@@ -51,7 +55,11 @@ $CONST['commodities'] = array(
 	"passengers" => array("price" => 4, "car_image" => "images/10194b.gif"),
 	"wool" => array("price" => 1, "car_image" => "images/4512c.gif"),
 	"timber" => array("price" => 1, "car_image" => "images/4543a.gif"),
+	"lumber" => array("price" => 1, "car_image" => "images/4543a.gif"),
 	"furniture" => array("price" => 1, "car_image" => "images/4563d.gif"),
+	"grain" => array("price" => 1, "car_image" => "images/3225c.gif"),
+	"mail" => array("price" => 1, "car_image" => "images/4758b.gif"),
+	"livestock" => array("price" => 1, "car_image" => "images/4564c.gif"),
 	);
 $CONST['towns'] = array(
 	1 => array("name" => "London", "lat" => 51, "lon" => 1),

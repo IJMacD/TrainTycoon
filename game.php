@@ -96,8 +96,8 @@ class Game
 	
 	function getCommodities($town_id, $commodity="")
 	{
-		global $database;
-		return $database->getCommodities($town_id, $commodity);
+		global $economy;
+		return $economy->getCommodities($town_id, $commodity);
 	}
 	
 	function updateTrain($id, $key, $value)

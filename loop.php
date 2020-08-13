@@ -96,7 +96,7 @@ function updateState(){
 				$biggest_price_difference = 0;
 				$best_commodity = -1;
 				$debug->log("Looking for best deals");
-				$MIN_PROFIT = 0.05;
+				$MIN_PROFIT = 0.5;
 				foreach($commodities as $k => $commodity)
 				{
 					$dest_commodity = $g->getCommodities($next_town, $commodity['name']);
@@ -160,8 +160,8 @@ function updateState(){
 				//		if it is producing it is fine
 				// if it is consuming check there is stock in the town to accomodate
 				$c = $g->getCommodities($building['town_id'], $commodity);
-				$needs = $g->dsimtime * -$rate;
-				if($rate < 0 && $c['surplus'] < $needs)
+				$needs = $g->dsimtime * -$rate * $building['scale'];
+				if($rate < 0 && $c['surplus'] <= $needs)
 				{
 					$has_all_consumables = false;
 					break;
@@ -172,7 +172,7 @@ function updateState(){
 			{
 				foreach($CONST['buildings'][$building['type']] as $commodity => $rate)
 				{
-					$g->updateCommodities($building['town_id'], $commodity, ($g->dsimtime * $rate));
+					$g->updateCommodities($building['town_id'], $commodity, ($g->dsimtime * $rate * $building['scale']));
 				}
 			}
 		}
@@ -181,11 +181,11 @@ function updateState(){
 	// update population based consumption
 	foreach ($g->getTowns() as $town) {
 		$pop = $town['population'];
-		$lpop = log($pop);
+		$kpop = $pop / 1e6;
 		
 		foreach ($CONST['consumers'] as $commodity => $rate) {
 			$c = $g->getCommodities($town['id'], $commodity);
-			$quantity = $g->dsimtime * $rate * $lpop * 0.1;
+			$quantity = $g->dsimtime * $rate * $kpop;
 			$debug->log("Trying to consume $quantity of $commodity at {$town['Name']}", 3);
 
 			if($quantity <= $c['surplus']) {
@@ -291,7 +291,8 @@ function updateVideo(){
 				echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['Name'].'</b><br>';
 				echo '<table><tr><th>Name</th><th>Quantity</th><th>Price</th></tr>';
 				foreach($g->getCommodities($town['id']) as $commodity){
-					echo '<tr><td>'.$commodity['name'].'</td><td>'.sprintf('%.3f', $commodity['surplus']).'</td><td>$'.sprintf('%.2f', $commodity['price']).'</td></tr>';
+					if ($commodity['surplus'] > 0)
+						echo '<tr><td>'.$commodity['name'].'</td><td>'.sprintf('%.3f', $commodity['surplus']).'</td><td>$'.sprintf('%.2f', $commodity['price']).'</td></tr>';
 				}
 				echo '</table></div>';
 			}

@@ -146,6 +146,57 @@ class DB
 		}
 	}
 
+	function getCommodities2 ($town_id, $commodity=NULL) {
+		$STOCKPILE_FACTOR = 0.05;
+
+		$q = "SELECT 
+				a.type,
+				(
+					(
+						a.supply_c0 
+						- SUM(IFNULL(d.supplies * c.scale, 0)) 
+						- (b.population / 1e6 * IFNULL(f.supplies, 0))
+						- IFNULL(g.available, 0) * $STOCKPILE_FACTOR
+					) * a.demand_m
+					-
+					(
+						a.demand_c0 
+						+ SUM(IFNULL(d.demands * c.scale, 0)) 
+						+ (b.population / 1e6 * IFNULL(f.demands, 0))
+					) * a.supply_m
+				) 
+				/ 
+				( a.demand_m - a.supply_m ) AS price,
+				IFNULL(e.available,0) AS available
+			FROM
+				commodities2 AS a
+				JOIN towns AS b
+				LEFT JOIN buildings AS c
+					ON c.town_id = b.id 
+				LEFT JOIN production AS d
+					ON c.`type` = d.`type` AND d.commodity = a.`type`
+				LEFT JOIN availability AS e
+					ON e.commodity = a.`type` AND e.town_id = b.id
+				LEFT JOIN production AS  f
+					ON f.`commodity` = a.`type` AND f.`type` = 'population'
+				LEFT JOIN availability AS g
+					ON g.town_id = b.id AND g.commodity = a.type
+			WHERE 
+				b.id = $town_id
+				"
+				. ($commodity ? " AND a.`type` = '$commodity' " : "")
+				. "
+			GROUP BY a.`type`";
+		
+		$r = $this->query($q);
+
+		if ($commodity) {
+			return $r->fetch_assoc();
+		}
+
+		return $r->fetch_all(MYSQLI_ASSOC);
+	}
+
 	function setCommodity ($town_id, $commodity, $supply, $demand, $price) {
 		
 		$q = "INSERT INTO `".TABLE_commodities."` (`town_id`,`commodity`,`surplus`,`demand`,`price`) "
@@ -162,6 +213,26 @@ class DB
 		$this->commodities[$town_id][$commodity]['supply']	= $supply;
 		$this->commodities[$town_id][$commodity]['demand']	= $demand;
 		$this->commodities[$town_id][$commodity]['price']	= $price;
+	}
+
+	function setCommodity2 ($town_id, $commodity, $available) {
+		
+		$q = "INSERT INTO `availability` (`town_id`,`commodity`,`available`) "
+			."VALUES ('$town_id','$commodity','$available') "
+			."ON DUPLICATE KEY UPDATE `available` = '$available'";
+		$this->query($q);
+
+		if(!isset($this->commodities)) $this->commodities = array();
+		if(!isset($this->commodities[$town_id])) $this->commodities[$town_id] = array();
+		if(!isset($this->commodities[$town_id][$commodity])) $this->commodities[$town_id][$commodity] = array();
+
+		$c = $this->getCommodities2($town_id, $commodity);
+
+		$this->commodities[$town_id][$commodity]['name']	= $commodity;
+		$this->commodities[$town_id][$commodity]['surplus']	= $available;
+		$this->commodities[$town_id][$commodity]['supply']	= $available;
+		$this->commodities[$town_id][$commodity]['demand']	= 0;
+		$this->commodities[$town_id][$commodity]['price']	= $c['price'];
 	}
 
 	function getCommodityList ($commodity) {
@@ -223,21 +294,3 @@ class DB
 	}
 }
 $database = new DB;
-
-function makeComodity ($commodity, $surplus=0) {
-	global $CONST;
-
-	$price = $CONST['commodities'][$commodity]['price'];
-	$price *= binom(1, 0.25);
-
-	return array('name' => $commodity, 'supply' => 200 + $surplus, 'demand' => 200 - $surplus, 'surplus' => $surplus, 'price' => $price);
-}
-
-function binom ($centre = 0.5, $range = 1, $iter = 3) {
-	$acc = 0;
-	for ($i = 0; $i < $iter; $i++) $acc += rand(0, 100000) / 100000;
-	$r = $acc / $iter;
-	$r += $centre - 0.5;
-	$r *= $range;
-	return $r;
-}
