@@ -2,8 +2,8 @@
 error_reporting(E_ALL);
 ini_set("display_errors", 1); 
 require_once("constants.php");
-require_once("database.mysqli.php");
 require_once("game.php");
+require_once("debug.php");
 require_once("lang.php");
 require_once("classes/train.class.php");
 
@@ -42,7 +42,7 @@ function updateInput(){
 
 // Check state
 function updateState(){
-	global $database, $g, $CONST;
+	global $database, $g, $debug, $CONST;
 	//echo $g->delta;
 	if($g->delta > TIMEOUT){
 		$g->State(STATE_PAUSED);
@@ -67,7 +67,7 @@ function updateState(){
 		{
 			$town_id = $train->getTown();
 
-			$database->log("{$train->getName()} arrived at " . $g->getTowns($town_id)['Name']);
+			$debug->log("{$train->getName()} arrived at " . $g->getTowns($town_id)['Name']);
 
 			//unload
 			$unloaded_cars = $train->unload();
@@ -89,19 +89,19 @@ function updateState(){
 			
 			//load
 			$next_town = $train->getTown();
-			$database->log("{$train->getName()} @ " . $g->getTowns($town_id)['Name'] . ' loading for ' . $g->getTowns($next_town)['Name']);
+			$debug->log("{$train->getName()} @ " . $g->getTowns($town_id)['Name'] . ' loading for ' . $g->getTowns($next_town)['Name']);
 			$full = false;
 			while (!$full) {
 				$commodities = $g->getCommodities($town_id);
 				$biggest_price_difference = 0;
 				$best_commodity = -1;
-				$database->log("Looking for best deals");
+				$debug->log("Looking for best deals");
 				$MIN_PROFIT = 0.05;
 				foreach($commodities as $k => $commodity)
 				{
 					$dest_commodity = $g->getCommodities($next_town, $commodity['name']);
 
-					$database->log('['.$commodity['name']."] Current: " . sprintf("$%.4f", $commodity['price']) . " Dest: ". sprintf("$%.4f", $dest_commodity['price']) . " Difference: " . sprintf("$%.4f", $dest_commodity['price'] - $commodity['price']) . " Available: " . sprintf("%.02f", $commodity['surplus']));
+					$debug->log('['.$commodity['name']."] Current: " . sprintf("$%.4f", $commodity['price']) . " Dest: ". sprintf("$%.4f", $dest_commodity['price']) . " Difference: " . sprintf("$%.4f", $dest_commodity['price'] - $commodity['price']) . " Available: " . sprintf("%.02f", $commodity['surplus']));
 
 					$price_difference = $dest_commodity['price'] - $commodity['price'];
 
@@ -114,17 +114,17 @@ function updateState(){
 				// We only want to load it if price is favourable
 				if($biggest_price_difference <= 0)
 				{
-					$database->log("Nothing available with profit more than ". m($MIN_PROFIT));
+					$debug->log("Nothing available with profit more than ". m($MIN_PROFIT));
 					break;
 				}
 
 				$commodity_to_load = $commodities[$best_commodity];
 				$ctl = $commodity_to_load;
 
-				$database->log('Biggest Difference: ['.$ctl['name'].'] $'.$biggest_price_difference);
+				$debug->log('Biggest Difference: ['.$ctl['name'].'] $'.$biggest_price_difference);
 
 				$surplus = $commodity_to_load['surplus'];
-				$database->log('Surplus: '.$surplus);
+				$debug->log('Surplus: '.$surplus);
 				$loaded = 0;
 				while($loaded + 1 <= $commodity_to_load['surplus'])
 				{
@@ -135,7 +135,7 @@ function updateState(){
 					}
 				}
 				
-				$database->log('Loaded '.$loaded.' '.$commodity_to_load['name']);
+				$debug->log('Loaded '.$loaded.' '.$commodity_to_load['name']);
 				$cost = $g->updateCommodities($town_id, $commodity_to_load['name'], -$loaded);
 
 				$wealth = $g->getData('wealth');
@@ -186,7 +186,7 @@ function updateState(){
 		foreach ($CONST['consumers'] as $commodity => $rate) {
 			$c = $g->getCommodities($town['id'], $commodity);
 			$quantity = $g->dsimtime * $rate * $lpop * 0.1;
-			$database->log("Trying to consume $quantity of $commodity at {$town['Name']}", 3);
+			$debug->log("Trying to consume $quantity of $commodity at {$town['Name']}", 3);
 
 			if($quantity <= $c['surplus']) {
 				$g->updateCommodities($town['id'], $commodity, -$quantity);

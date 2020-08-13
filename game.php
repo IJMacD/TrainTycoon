@@ -1,4 +1,7 @@
 <?php
+require_once("constants.php");
+require_once("database.mysqli.php");
+require_once("economy.php");
 
 $MAX_DELTA = 10;
 
@@ -21,15 +24,15 @@ class Game
 	
 	function init()
 	{
-		global $database, $MAX_DELTA;
+		global $database, $debug, $MAX_DELTA;
 		
 		$this->lasttime = $this->getData('lasttime');
 		$time = microtime(true);
 		$this->delta = min($time - $this->lasttime, $MAX_DELTA);
-		$database->log('Delta: '.$this->delta);	
+		$debug->log('Delta: '.$this->delta);	
 		$this->setData('lasttime', $time);
 		$this->dsimtime = $this->delta / TIME_SCALE * $this->Speed();
-		$database->log("Delta (Sim): " . $this->dsimtime, 2);
+		$debug->log("Delta (Sim): " . $this->dsimtime, 2);
 	}
 
 	function getData($key){
@@ -105,15 +108,15 @@ class Game
 	
 	function updateCommodities($town_id, $commodity, $dsurplus)
 	{
-		global $database;
-		return $database->updateCommodities($town_id, $commodity, $dsurplus);
+		global $economy;
+		return $economy->updateCommodities($town_id, $commodity, $dsurplus);
 	}
 
 	function break ($msg = "") {
-		global $database;
+		global $debug;
 		$this->hasBreak = true;
 		$this->State(0);
-		$database->log(strlen($msg) > 0 ? "BREAK - " . $msg : "BREAK");
+		$debug->log(strlen($msg) > 0 ? "BREAK - " . $msg : "BREAK");
 	}
 }
 ?>

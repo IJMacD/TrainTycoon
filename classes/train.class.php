@@ -254,7 +254,7 @@ class Train
 	 */
 	static function getTrain($id)
 	{
-		global $database, $g;
+		global $database, $g, $debug;
 		
 		if(!is_array(Train::$_singleton))
 			Train::$_singleton = array();
@@ -312,7 +312,7 @@ class Train
 					$train->cars[] = $t['Car_'.$i];
 			}
 
-			$database->log(print_r($train, true));
+			$debug->log(print_r($train, true));
 			
 			Train::$_singleton[$id] = $train;
 		}

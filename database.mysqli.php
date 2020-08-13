@@ -1,5 +1,7 @@
 <?php
 require_once("constants.php");
+require_once("debug.php");
+
 class DB
 {
 	private $connection;
@@ -10,26 +12,11 @@ class DB
 		$this->connection = mysqli_connect(DB_HOST, DB_USER, DB_PASS) or $this->redirect("Server Error<br>Cannot connect to database server");
 		mysqli_select_db($this->connection, DB_NAME) or $this->redirect("Server Error<br>Cannot select database");
     }
-	
-	function log($message, $level=1)
-	{
-		if(isset($_GET['debug']))
-		{
-			if(strlen($_GET['debug']))
-				$debug = $_GET['debug'];
-			else
-				$debug = 1;
-		}
-		else
-			$debug = 0;
-		
-		if($debug >= $level)
-			echo $message."<br>\n";
-	}
 
 	function query($q){
+		global $debug;
 		$result = mysqli_query($this->connection, $q);
-		$this->log($q, 3);
+		$debug->log($q, 3);
 		if(mysqli_error($this->connection)){
 			echo mysqli_error($this->connection)."<br>".$q;
 		}
@@ -122,6 +109,8 @@ class DB
 	
 	function getCommodities($town_id, $commodity="")
 	{
+		global $debug;
+		
 		if(!isset($this->commodities[$town_id])){
 			$this->commodities[$town_id] = array();
 			$q = "SELECT `commodity` as 'name',`surplus` as 'supply',`surplus` - `demand` as 'surplus',`demand`,`price` FROM `".TABLE_commodities."` WHERE `town_id` = '$town_id' ORDER BY `price` DESC";
@@ -136,14 +125,14 @@ class DB
 		
 		if(!strlen($commodity))
 		{
-			$this->log('Commodity not specified', 2);
+			$debug->log('Commodity not specified', 2);
 			return $this->commodities[$town_id];
 		}
 		else
 		{
 			if(!isset($this->commodities[$town_id][$commodity]))
 			{
-				$this->log('Commodity specified don\'t have it', 2);
+				$debug->log('Commodity specified don\'t have it', 2);
 				$c = makeComodity($commodity);
 				$price = $c['price'];
 				$supply = $c['supply'];
@@ -151,7 +140,7 @@ class DB
 				$this->setCommodity($town_id, $commodity, $supply, $demand, $price);
 			}
 			else
-				$this->log('Commodity specified do have it', 2);
+				$debug->log('Commodity specified do have it', 2);
 
 			return $this->commodities[$town_id][$commodity];
 		}
@@ -199,82 +188,6 @@ class DB
 		$q = "UPDATE `".TABLE_trains."` SET `$key` = $v WHERE `id` = '$id'";
 		$this->query($q);
 		$this->trains[$id][$key] = $value;
-	}
-	
-	/**
-	 * Big method to calculate entire economy!
-	 */
-	function updateCommodities($town_id, $commodity, $dsurplus){
-		global $CONST;
-	
-		$return_value = 0;
-		
-		$c = $this->getCommodities($town_id);
-		//print_r($c);
-		if(isset($c[$commodity]))
-		{
-			$price = $c[$commodity]['price'];
-			$supply = $c[$commodity]['supply'];
-			$demand = $c[$commodity]['demand'];
-
-			$return_value = $dsurplus * $price;
-			/*
-			$q = "SELECT ";
-			$q .= "(SELECT AVG(`price`) FROM `".TABLE_commodities."` WHERE `commodity` = '$commodity') as 'avg_price',";
-			$q .= "(SELECT AVG(`surplus`) FROM `".TABLE_commodities."` WHERE `commodity` = '$commodity') as 'avg_surplus'";
-			//$q .= " FROM `".TABLE_commodities."` WHERE `town_id` = '$town_id' AND `commodity` = '$commodity'";
-			$result = $this->query($q);
-			if($result && mysql_num_rows($result)){
-				$avg_price = mysql_result($result, 0, "avg_price");
-				$avg_surplus = mysql_result($result, 0, "avg_surplus");
-				if($surplus == $avg_surplus){
-					$price = $avg_price;
-					$surplus += $dsurplus;
-				}else{
-					$a = ($price - $avg_price)/($surplus - $avg_surplus);
-					$b = $price - $a * $surplus;
-					$surplus += $dsurplus;
-					$price = $a * $surplus + $b;
-					//$price *= (rand(16, 25) / 20); //rand(0.8, 1.25)
-					$price = max(0, $price);
-				}
-			}else{
-				$price = $CONST['commodities'][$commodity]['price'];
-				$price *= (rand(16, 25) / 20);
-				$surplus = $dsurplus;
-			}*/
-			$t = $this->getTowns($town_id);
-			$this->log(($dsurplus > 0 ? "SELL" : "BUY") . ": [$commodity x ".abs($dsurplus)."] @ $$price, Supply $supply, Demand $demand, From {$t['Name']}");
-			if($dsurplus > 0)
-			{
-				$supply += $dsurplus;
-				$price -= ($dsurplus / $supply) * $price;
-			}
-			else
-			{
-				$demand -= $dsurplus;
-				$price -= ($dsurplus / $demand) * $price;
-			}
-			// P = m_D.Q + c_D
-			// P = m_S.Q + c_S
-			// M = m_D/m_S
-			// P = (M.c_D + c_S)/(1 - M)
-			// Q === surplus
-			// dP = m_D.dQ
-			// $m_D = -1;
-			$this->log("New Price for [$commodity] at {$t['Name']}: Price $price, Supply $supply, Demand $demand");
-			//$price = max(0, $price);
-		}else{
-			$c = makeComodity($commodity, $dsurplus);
-			$price = $c['price'];
-			$supply = $c['supply'];
-			$demand = $c['demand'];
-			$return_value = $c['price'] * $dsurplus;
-		}
-		
-		$this->setCommodity($town_id, $commodity, $supply, $demand, $price);
-
-		return $return_value;
 	}
 	
 	function populateLocosTable(){

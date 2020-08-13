@@ -28,8 +28,9 @@ class DB
 	}
 
 	function query($q){
+		global $debug;
 		$result = mysql_query($q, $this->connection);
-		$this->log($q, 3);
+		$debug->log($q, 3);
 		if(mysql_error()){
 			echo mysql_error()."<br>".$q;
 		}
@@ -131,6 +132,7 @@ class DB
 	
 	function getCommodities($town_id, $commodity="")
 	{
+		global $debug;
 		if(!isset($this->commodities[$town_id])){
 			$this->commodities[$town_id] = array();
 			$q = "SELECT `commodity` as 'name',`surplus` as 'supply',`surplus` - `demand` as 'surplus',`demand`,`price` FROM `".TABLE_commodities."` WHERE `town_id` = '$town_id' ORDER BY `price` DESC";
@@ -145,18 +147,18 @@ class DB
 		
 		if(!strlen($commodity))
 		{
-			$this->log('Commodity not specified', 2);
+			$debug->log('Commodity not specified', 2);
 			return $this->commodities[$town_id];
 		}
 		else
 		{
 			if(!isset($this->commodities[$town_id][$commodity]))
 			{
-				$this->log('Commodity specified don\'t have it', 2);
+				$debug->log('Commodity specified don\'t have it', 2);
 				$this->commodities[$town_id][$commodity] = array('name' => $commodity, 'supply' => 0, 'demand' => 0, 'surplus' => 0, 'price' => 0);
 			}
 			else
-				$this->log('Commodity specified do have it', 2);
+				$debug->log('Commodity specified do have it', 2);
 			return $this->commodities[$town_id][$commodity];
 		}
 	}
@@ -177,7 +179,7 @@ class DB
 	 * Big method to calculate entire economy!
 	 */
 	function updateCommodities($town_id, $commodity, $dsurplus){
-		global $CONST;
+		global $debug, $CONST;
 		
 		$c = $this->getCommodities($town_id);
 		//print_r($c);
@@ -211,7 +213,7 @@ class DB
 				$price *= (rand(16, 25) / 20);
 				$surplus = $dsurplus;
 			}*/
-			$this->log("TRADE: [$commodity-$town_id] Initial: Price $price, Supply $supply, Demand $demand");
+			$debug->log("TRADE: [$commodity-$town_id] Initial: Price $price, Supply $supply, Demand $demand");
 			if($dsurplus > 0)
 			{
 				$supply += $dsurplus;
@@ -228,7 +230,7 @@ class DB
 			// dP = m_D.dQ
 			$m_D = -1;
 			$price += $m_D * $dsurplus;
-			$this->log("TRADE: [$commodity-$town_id] Final: Price $price, Supply $supply, Demand $demand");
+			$debug->log("TRADE: [$commodity-$town_id] Final: Price $price, Supply $supply, Demand $demand");
 			//$price = max(0, $price);
 		}else{
 			$price = $CONST['commodities'][$commodity]['price'];
