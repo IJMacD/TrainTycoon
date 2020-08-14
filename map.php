@@ -18,7 +18,7 @@ define("MAP_MIN_LAT", 49.26373617);
 define("MAP_MAX_LON", 2.521819508);
 define("MAP_MAX_LAT", 59.74063649);
 
-$debug = isset($_GET['debug']) ? $_GET['debug'] : 0;
+$debug_level = isset($_GET['debug']) ? $_GET['debug'] : 0;
 
 function LoadGif($imgname)
 {
@@ -54,7 +54,7 @@ $train_colour = imagecolorallocate($img, 20, 140, 20);
 $x_scale = $img_w / (MAP_MAX_LON - MAP_MIN_LON);
 $y_scale = $img_h / (MAP_MAX_LAT - MAP_MIN_LAT);
 
-if ($debug) {
+if ($debug_level) {
     $line = 1;
     $text_colour = imagecolorallocate ($img, 255, 0, 0);
     imagestring ($img, 4, 5, 15 * $line++, 'Image Size: ' . $img_w . 'x' . $img_h . ' Scale: ' . $x_scale . 'x' . $y_scale, $text_colour);
@@ -119,7 +119,7 @@ foreach ($trains as $train) {
 foreach ($towns as $town) {
     list($x, $y) = toCoords($town['lon'], $town['lat']);
 
-    if ($debug) {
+    if ($debug_level) {
         imagestring ($img, 4, 5, 15 * $line++, $town['Name'] . ' ('.$town['lon'].','.$town['lat'].') -> ('.$x.','.$y.')', $text_colour);
     }
 

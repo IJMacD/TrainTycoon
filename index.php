@@ -19,13 +19,22 @@
 	font-size: 0.8em;
 	font-weight: bold;
 }
-.town_list{
-	width: 200px;
+.economy-list {
+	display: flex;
+	flex-wrap: wrap;
+}
+.town_list {
+	flex: 1;
 	border: 1px solid #AAAAFF;
 	background: #F0F0FF;
 	margin: 3px;
 	padding: 5px;
-	display: inline-block;
+}
+.hidden-detail {
+	display: none;
+}
+.full-details .hidden-detail {
+	display: revert;
 }
 #map-holder {
 	overflow: hidden;
@@ -42,10 +51,11 @@
 <input type="button" onclick="$('#trains').load('loop.php?state=pause')" value="Pause" />
 <input type="button" id="looping-btn" value="Start Loop"/>
 <input type="button" onclick="run();" value="Step"/>
-<label for="debug">Debug</label>
+<label for="debug1">Debug</label>
 <input type="checkbox" name="debug1" id="debug1" />
 <input type="checkbox" name="debug2" id="debug2" />
 <input type="checkbox" name="debug3" id="debug3" />
+<label>Full Details <input type="checkbox" id="full-details" /></label>
 <div class="row">
 	<div id="trains"></div>
 	<div id="map-holder">
@@ -111,6 +121,9 @@ function update()
 		//$.getJSON('loop.php?out=json', function(data){game=data});
 	});
 }
+document.getElementById('full-details').addEventListener('change', e => {
+	document.body.classList.toggle("full-details", e.checked);
+});
 const displayImg = document.getElementById('map');
 const holder = document.getElementById('map-holder');
 function updateImage () {
@@ -126,7 +139,12 @@ function updateImage () {
 			holder.style.width = img.width / devicePixelRatio / 2;
 			holder.style.height = img.height / devicePixelRatio / 2;
 
-			if (looping) setTimeout(updateImage, 2000);
+			setTimeout(() => looping && updateImage(), 2000);
+		}
+
+		img.onerror = () => {
+			console.log("Error loading map");
+			setTimeout(() => looping && updateImage(), 10000);
 		}
 
 		img.src = url;

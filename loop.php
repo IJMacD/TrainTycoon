@@ -287,8 +287,10 @@ function updateVideo(){
 		echo '</div>';
 	}
 	
+	if(count($g->getTrains()) < 1) $lang['en']['no_trains'];
+
 	$show = isset($_GET['view']) ? $_GET['view'] : "towns";
-	$showOptions = ["Towns","Commodities"]; 
+	$showOptions = ["Towns","Commodities","Demand"]; 
 
 	echo '<p>';
 	foreach ($showOptions as $o) {
@@ -301,30 +303,43 @@ function updateVideo(){
 	}
 	echo '</p>';
 
+	echo '<div class="economy-list">';
 	switch ($show) {
 		case "towns":
 			foreach($g->getTowns() as $town){
 				echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['Name'].'</b><br>';
 				echo '<table><tr><th>Name</th><th>Quantity</th><th>Price</th></tr>';
 				foreach($g->getCommodities($town['id']) as $commodity){
-					if ($commodity['surplus'] > 0)
-						echo '<tr><td>'.$commodity['name'].'</td><td>'.sprintf('%.3f', $commodity['surplus']).'</td><td>$'.sprintf('%.2f', $commodity['price']).'</td></tr>';
+					$h = $commodity['surplus'] <= 0 ? 'class="hidden-detail"' : '';
+					echo "<tr $h><td>".$commodity['name'].'</td><td>'.sprintf('%.3f', $commodity['surplus']).'</td><td>$'.sprintf('%.2f', $commodity['price']).'</td></tr>';
 				}
 				echo '</table></div>';
 			}
-			if(count($g->getTrains()) < 1) $lang['en']['no_trains'];
 		break;
 		case "commodities":
 			foreach ($database->getCommodityTypes() as $commodity) {
 				echo '<div id="commodity_'.$commodity.'" class="town_list"><b>'.ucfirst($commodity).'</b><br>';
 				echo '<table><tr><th>Town</th><th>Surplus</th><th>Price</th></tr>';
 				foreach($database->getCommodityList($commodity) as $c){
-					echo '<tr><td>'.$g->getTowns($c['town_id'])['Name'].'</td><td>'.sprintf('%.3f', $c['surplus']).'</td><td>$'.sprintf('%.2f', $c['price']).'</td></tr>';
+					$h = $c['available'] <= 0 ? 'class="hidden-detail"' : '';
+					echo "<tr $h><td>".$g->getTowns($c['town_id'])['Name'].'</td><td>'.sprintf('%.3f', $c['available']).'</td><td>$'.sprintf('%.2f', $c['price']).'</td></tr>';
+				}
+				echo '</table></div>';
+			}
+		break;
+		case "demand":
+			foreach($g->getTowns() as $town){
+				echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['Name'].'</b><br>';
+				echo '<table><tr><th>Name</th><th>Supply</th><th>Demand</th><th>Available</th></tr>';
+				foreach($database->getCommoditySupplyDemand($town['id']) as $commodity){
+					$h = $commodity['available'] <= 0 ? 'class="hidden-detail"' : '';
+					echo "<tr $h><td>".$commodity['type'].'</td><td>'.sprintf('%.3f', $commodity['supply']).'</td><td>'.sprintf('%.3f', $commodity['demand']).'</td><td>'.sprintf('%.3f', $commodity['available']).'</td></tr>';
 				}
 				echo '</table></div>';
 			}
 		break;
 	}
+	echo '</div>';
 
 	if ($g->hasBreak)
 	{
