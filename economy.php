@@ -17,7 +17,7 @@ class Economy {
 		 * 	available
 		 * }>
 		 */
-		$commodities = $database->getCommodities2($town_id);
+		$commodities = $database->getCommodities($town_id);
 		
 		/*
 		 * getCommodities()
@@ -58,9 +58,9 @@ class Economy {
 	
 		$return_value = 0;
 		
-		$c = $database->getCommodities2($town_id, $commodity);
+		$c = $this->getCommodities($town_id, $commodity);
 		
-		$database->setCommodity2($town_id, $commodity, $c['available'] + $dsurplus);
+		$database->setCommodity($town_id, $commodity, $c['surplus'] + $dsurplus);
 
 		return $dsurplus * $c['price'];
 	}

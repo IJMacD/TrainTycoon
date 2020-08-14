@@ -90,7 +90,7 @@ class Train
 	}
 
 	function getLoadingTime () {
-		$t = $this->loading_timeout * TIME_SCALE / 60;
+		$t = max($this->loading_timeout * TIME_SCALE / 60, 0);
 		$i = (int)$t;
 		$r = $t - $i;
 
@@ -196,6 +196,8 @@ class Train
 
 		$this->loading_timeout = 0;
 		$database->updateTrain($this->id, "loading_timeout", $this->loading_timeout);
+
+		$this->state = "RUNNING";
 	}
 	/**
 	 * Returns whether or not load was successful
@@ -311,8 +313,6 @@ class Train
 				if(strlen($t['Car_'.$i]))
 					$train->cars[] = $t['Car_'.$i];
 			}
-
-			$debug->log(print_r($train, true));
 			
 			Train::$_singleton[$id] = $train;
 		}

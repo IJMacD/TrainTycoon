@@ -5,6 +5,8 @@ require_once("debug.php");
 class DB
 {
 	private $connection;
+
+	private $commodities = [];
 	
     function __construct()
 	{
@@ -106,146 +108,45 @@ class DB
 		}
 		return $this->stations;
 	}
-	
-	function getCommodities($town_id, $commodity="")
-	{
-		global $debug;
-		
+
+	function getCommodities ($town_id) {
 		if(!isset($this->commodities[$town_id])){
-			$this->commodities[$town_id] = array();
-			$q = "SELECT `commodity` as 'name',`surplus` as 'supply',`surplus` - `demand` as 'surplus',`demand`,`price` FROM `".TABLE_commodities."` WHERE `town_id` = '$town_id' ORDER BY `price` DESC";
-			$result = $this->query($q);
-			if($result && $result->num_rows > 0)
-			{
-				while($row = $result->fetch_assoc()){
-					$this->commodities[$town_id][$row['name']] = $row;
-				}
-			}
+			$q = economySQL("town", $town_id);
+			$this->commodities[$town_id] = $this->query($q)->fetch_all(MYSQLI_ASSOC);
 		}
-		
-		if(!strlen($commodity))
-		{
-			$debug->log('Commodity not specified', 2);
-			return $this->commodities[$town_id];
-		}
-		else
-		{
-			if(!isset($this->commodities[$town_id][$commodity]))
-			{
-				$debug->log('Commodity specified don\'t have it', 2);
-				$c = makeComodity($commodity);
-				$price = $c['price'];
-				$supply = $c['supply'];
-				$demand = $c['demand'];
-				$this->setCommodity($town_id, $commodity, $supply, $demand, $price);
-			}
-			else
-				$debug->log('Commodity specified do have it', 2);
 
-			return $this->commodities[$town_id][$commodity];
-		}
+		return $this->commodities[$town_id];
 	}
 
-	function getCommodities2 ($town_id, $commodity=NULL) {
-		$STOCKPILE_FACTOR = 0.05;
-
-		$q = "SELECT 
-				a.type,
-				(
-					(
-						a.supply_c0 
-						- SUM(IFNULL(d.supplies * c.scale, 0)) 
-						- (b.population / 1e6 * IFNULL(f.supplies, 0))
-						- IFNULL(g.available, 0) * $STOCKPILE_FACTOR
-					) * a.demand_m
-					-
-					(
-						a.demand_c0 
-						+ SUM(IFNULL(d.demands * c.scale, 0)) 
-						+ (b.population / 1e6 * IFNULL(f.demands, 0))
-					) * a.supply_m
-				) 
-				/ 
-				( a.demand_m - a.supply_m ) AS price,
-				IFNULL(e.available,0) AS available
-			FROM
-				commodities2 AS a
-				JOIN towns AS b
-				LEFT JOIN buildings AS c
-					ON c.town_id = b.id 
-				LEFT JOIN production AS d
-					ON c.`type` = d.`type` AND d.commodity = a.`type`
-				LEFT JOIN availability AS e
-					ON e.commodity = a.`type` AND e.town_id = b.id
-				LEFT JOIN production AS  f
-					ON f.`commodity` = a.`type` AND f.`type` = 'population'
-				LEFT JOIN availability AS g
-					ON g.town_id = b.id AND g.commodity = a.type
-			WHERE 
-				b.id = $town_id
-				"
-				. ($commodity ? " AND a.`type` = '$commodity' " : "")
-				. "
-			GROUP BY a.`type`";
-		
-		$r = $this->query($q);
-
-		if ($commodity) {
-			return $r->fetch_assoc();
-		}
-
-		return $r->fetch_all(MYSQLI_ASSOC);
-	}
-
-	function setCommodity ($town_id, $commodity, $supply, $demand, $price) {
-		
-		$q = "INSERT INTO `".TABLE_commodities."` (`town_id`,`commodity`,`surplus`,`demand`,`price`) "
-			."VALUES ('$town_id','$commodity','$supply','$demand','$price') "
-			."ON DUPLICATE KEY UPDATE `surplus` = '$supply', `demand` = '$demand', `price` = '$price'";
-		$this->query($q);
-
-		if(!isset($this->commodities)) $this->commodities = array();
-		if(!isset($this->commodities[$town_id])) $this->commodities[$town_id] = array();
-		if(!isset($this->commodities[$town_id][$commodity])) $this->commodities[$town_id][$commodity] = array();
-
-		$this->commodities[$town_id][$commodity]['name']	= $commodity;
-		$this->commodities[$town_id][$commodity]['surplus']	= $supply - $demand;
-		$this->commodities[$town_id][$commodity]['supply']	= $supply;
-		$this->commodities[$town_id][$commodity]['demand']	= $demand;
-		$this->commodities[$town_id][$commodity]['price']	= $price;
-	}
-
-	function setCommodity2 ($town_id, $commodity, $available) {
-		
+	function setCommodity ($town_id, $commodity, $available) {
 		$q = "INSERT INTO `availability` (`town_id`,`commodity`,`available`) "
 			."VALUES ('$town_id','$commodity','$available') "
 			."ON DUPLICATE KEY UPDATE `available` = '$available'";
 		$this->query($q);
 
-		if(!isset($this->commodities)) $this->commodities = array();
-		if(!isset($this->commodities[$town_id])) $this->commodities[$town_id] = array();
-		if(!isset($this->commodities[$town_id][$commodity])) $this->commodities[$town_id][$commodity] = array();
-
-		$c = $this->getCommodities2($town_id, $commodity);
-
-		$this->commodities[$town_id][$commodity]['name']	= $commodity;
-		$this->commodities[$town_id][$commodity]['surplus']	= $available;
-		$this->commodities[$town_id][$commodity]['supply']	= $available;
-		$this->commodities[$town_id][$commodity]['demand']	= 0;
-		$this->commodities[$town_id][$commodity]['price']	= $c['price'];
+		unset($this->commodities[$town_id]); // invalidate cache
 	}
 
 	function getCommodityList ($commodity) {
-		$q = "SELECT `town_id`,`surplus` as 'supply',`surplus` - `demand` as 'surplus',`demand`,`price` FROM `".TABLE_commodities."` WHERE commodity = '$commodity' ORDER BY `price` DESC";
+		$q = economySQL("commodity", $commodity);
 		return $this->query($q)->fetch_all(MYSQLI_ASSOC);
 	}
 
 	function getCommodityTypes () {
-		$q = "SELECT `commodity` FROM `" . TABLE_commodities . "` GROUP BY `commodity` ORDER BY `commodity`";
+		$q = "SELECT `type` FROM commodities2 ORDER BY `type`";
 		$r =  $this->query($q);
 		$out = [];
 		while($commodity = $r->fetch_row()) $out[] = $commodity[0];
 		return $out;
+	}
+
+	function getCommoditySupplyDemand ($town_id) {
+		return $this->query(economySQL("supply_demand", $town_id))->fetch_all(MYSQLI_ASSOC);
+	}
+
+	function getProduction ($building_type) {
+		$q = "SELECT commodity, supplies, demands FROM production WHERE `type` = '$building_type'";
+		return $this->query($q)->fetch_all(MYSQLI_ASSOC);
 	}
 	
 	function setData($key, $value){
@@ -294,3 +195,59 @@ class DB
 	}
 }
 $database = new DB;
+
+function economySQL ($mode, $id) {
+	$STOCKPILE_FACTOR = 0.05;
+
+	$col = $mode === "town" ? "a.type" : "b.id AS town_id";
+
+	$supply = "SUM(IFNULL(d.supplies * c.scale, 0)) 
+	+ (b.population / 1e6 * IFNULL(f.supplies, 0))
+	+ IFNULL(g.available, 0) * $STOCKPILE_FACTOR";
+
+	$demand = "SUM(IFNULL(d.demands * c.scale, 0)) 
+	+ (b.population / 1e6 * IFNULL(f.demands, 0))";
+
+	$price = "(
+		(a.supply_c0 - ($supply)) * a.demand_m
+		-
+		(a.demand_c0 + $demand) * a.supply_m
+	) / ( a.demand_m - a.supply_m ) AS price";
+
+	$available = "IFNULL(e.available,0) AS available";
+
+	if ($mode === "town") {
+		$cols = "a.type, $price, $available";
+	} else if ($mode === "commodity") {
+		$cols = "b.id AS town_id, $price, $available";
+	} else if ($mode === "supply_demand") {
+		$cols = "a.type, ($supply) AS supply, ($demand) AS demand, $available";
+	} else {
+		$cols = "*";
+	}
+	
+	$sql = "SELECT 
+		$cols
+	FROM
+		commodities2 AS a
+		JOIN towns AS b
+		LEFT JOIN buildings AS c
+			ON c.town_id = b.id 
+		LEFT JOIN production AS d
+			ON c.`type` = d.`type` AND d.commodity = a.`type`
+		LEFT JOIN availability AS e
+			ON e.commodity = a.`type` AND e.town_id = b.id
+		LEFT JOIN production AS  f
+			ON f.`commodity` = a.`type` AND f.`type` = 'population'
+		LEFT JOIN availability AS g
+			ON g.town_id = b.id AND g.commodity = a.type
+	";
+
+	if ($mode === "town" || $mode === "supply_demand") {
+		$sql .= "WHERE b.id = $id GROUP BY a.`type`";
+	} else if ($mode === "commodity") {
+		$sql .= "WHERE a.type = '$id' GROUP BY b.id ORDER BY price DESC";
+	}
+
+	return $sql;
+}

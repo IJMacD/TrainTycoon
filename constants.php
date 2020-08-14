@@ -25,28 +25,12 @@ define("TABLE_commodities", "commodities");
 
 $CONST = array();
 
-$CONST['buildings'] = array(	// Rate per year
-	"sheep_farm" => array("wool" => 12),
-	"textiles" => array("wool" => -8, "fabric" => 4),
-	"tailor" => array("fabric" => -4, "clothing" => 2.5),
-	"forest" => array("logs" => 6),
-	"lumber_mill" => array("logs" => -6, "lumber" => 6),
-	"carpenter" => array("lumber" => -6, "furniture" => 6),
-	"distillery" => array("grain" => -6, "alcohol" => 6),
-	"post_office" => array("mail" => 2),
-	"farm" => array("grain" => 2, "livestock" => 1),
-	"abattoir" => array("livestock" => -1, "meat" => 9),
-	);
-$CONST['consumers'] = array(
-	"furniture" => 2,
-	"clothes" => 2,
-);
 $CONST['locos'] = array(
 	1 => array("name" => "Flying Scotsman", "number" => "4472", "configuration" => "4-6-2", "topspeed" => 100, "reliability" => 0.95, "price" => 1000, "start_year" => 1923, "image" => "images/10194-1.gif"),
 	2 => array("name" => "Mallard", "number" => "4468", "configuration" => "4-6-2", "topspeed" => 100, "reliability" => 0.85, "price" => 800, "start_year" => 1938, "image" => "images/kt203.gif")
 	);
 $CONST['commodities'] = array(
-	"alcohol" => array("price" => 5, "car_image" => "images/a_10017_1.gif"),
+	"alcohol" => array("price" => 5, "car_image" => "images/4537.gif"),
 	"clothing" => array("price" => 3, "car_image" => "images/10194b.gif"),
 	"coal" => array("price" => 3, "car_image" => "images/10183c.gif"),
 	"cotton" => array("price" => 1, "car_image" => "images/4512c.gif"),
@@ -60,12 +44,6 @@ $CONST['commodities'] = array(
 	"grain" => array("price" => 1, "car_image" => "images/3225c.gif"),
 	"mail" => array("price" => 1, "car_image" => "images/4758b.gif"),
 	"livestock" => array("price" => 1, "car_image" => "images/4564c.gif"),
-	);
-$CONST['towns'] = array(
-	1 => array("name" => "London", "lat" => 51, "lon" => 1),
-	2 => array("name" => "Birmingham", "lat" => 52, "lon" => -2),
-	3 => array("name" => "Manchester", "lat" => 53, "lon" => -2),
-	4 => array("name" => "Nottingham", "lat" => 52, "lon" => -1),
 	);
 $CONST['station_suffixes'] = array("Central", "Crossing", "Gate", "Junction", "Picadilly", "Priory", "East", "West", "North", "South", "Gap", "New Street", "High Street", "Halt");
 

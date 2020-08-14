@@ -99,15 +99,17 @@ function updateState(){
 				$MIN_PROFIT = 0.5;
 				foreach($commodities as $k => $commodity)
 				{
-					$dest_commodity = $g->getCommodities($next_town, $commodity['name']);
+					if ($commodity['surplus'] >= 1) {
+						$dest_commodity = $g->getCommodities($next_town, $commodity['name']);
 
-					$debug->log('['.$commodity['name']."] Current: " . sprintf("$%.4f", $commodity['price']) . " Dest: ". sprintf("$%.4f", $dest_commodity['price']) . " Difference: " . sprintf("$%.4f", $dest_commodity['price'] - $commodity['price']) . " Available: " . sprintf("%.02f", $commodity['surplus']));
+						$debug->log('['.$commodity['name']."] Current: " . sprintf("$%.4f", $commodity['price']) . " Dest: ". sprintf("$%.4f", $dest_commodity['price']) . " Difference: " . sprintf("$%.4f", $dest_commodity['price'] - $commodity['price']) . " Available: " . sprintf("%.02f", $commodity['surplus']));
 
-					$price_difference = $dest_commodity['price'] - $commodity['price'];
+						$price_difference = $dest_commodity['price'] - $commodity['price'];
 
-					if($price_difference - $MIN_PROFIT > $biggest_price_difference && $commodity['surplus'] >= 1){
-						$best_commodity = $k;
-						$biggest_price_difference = $price_difference;
+						if($price_difference - $MIN_PROFIT > $biggest_price_difference && $commodity['surplus'] >= 1){
+							$best_commodity = $k;
+							$biggest_price_difference = $price_difference;
+						}
 					}
 				}
 
@@ -154,26 +156,39 @@ function updateState(){
 			$town = $g->getTowns($building['town_id']);
 			$has_all_consumables = true;
 
-			foreach($CONST['buildings'][$building['type']] as $commodity => $rate)
+			$rates = $database->getProduction($building['type']);
+
+			$total_cost = 0;
+			$total_revenue = 0;
+
+			foreach($rates as $rate)
 			{
 				// check all negative rates
 				//		if it is producing it is fine
 				// if it is consuming check there is stock in the town to accomodate
-				$c = $g->getCommodities($building['town_id'], $commodity);
-				$needs = $g->dsimtime * -$rate * $building['scale'];
-				if($rate < 0 && $c['surplus'] <= $needs)
-				{
+				$c = $g->getCommodities($building['town_id'], $rate['commodity']);
+
+				$needs = $g->dsimtime * $rate['demands'] * $building['scale'];
+
+				$total_cost += $needs * $c['price'];
+				$total_revenue += $g->dsimtime * $rate['supplies'] * $building['scale'] * $c['price'];
+				
+				if($rate['demands'] > 0 && $c['surplus'] < $needs) {
 					$has_all_consumables = false;
-					break;
+					$debug->log("Not enough {$rate['commodity']} available for ". $building['type'] . " at " . $g->getTowns($building['town_id'])['Name'],2);
 				}
 			}
 
-			if($has_all_consumables)
+			if($has_all_consumables && $total_revenue > $total_cost)
 			{
-				foreach($CONST['buildings'][$building['type']] as $commodity => $rate)
+				foreach($rates as $rate)
 				{
-					$g->updateCommodities($building['town_id'], $commodity, ($g->dsimtime * $rate * $building['scale']));
+					$delta = $rate['supplies'] > 0 ? $rate['supplies'] : -$rate['demands'];
+					$g->updateCommodities($building['town_id'], $rate['commodity'], ($g->dsimtime * $delta * $building['scale']));
 				}
+			}
+			else {
+				if ($total_revenue <= $total_cost) $debug->log($building['type'] . " at " . $g->getTowns($building['town_id'])['Name'] ." not operating because there's no profit in it.");
 			}
 		}
 	}
@@ -183,13 +198,14 @@ function updateState(){
 		$pop = $town['population'];
 		$kpop = $pop / 1e6;
 		
-		foreach ($CONST['consumers'] as $commodity => $rate) {
-			$c = $g->getCommodities($town['id'], $commodity);
-			$quantity = $g->dsimtime * $rate * $kpop;
-			$debug->log("Trying to consume $quantity of $commodity at {$town['Name']}", 3);
+		foreach ($database->getProduction('population') as $rate) {
+			$c = $g->getCommodities($town['id'], $rate['commodity']);
+			$delta = $rate['supplies'] > 0 ? $rate['supplies'] : -$rate['demands'];
+			$quantity = $g->dsimtime * $delta * $kpop;
+			$debug->log("Trying to consume/produce $quantity of {$rate['commodity']} at {$town['Name']}", 3);
 
-			if($quantity <= $c['surplus']) {
-				$g->updateCommodities($town['id'], $commodity, -$quantity);
+			if(-$quantity <= $c['surplus']) {
+				$g->updateCommodities($town['id'], $rate['commodity'], $quantity);
 			}
 		}
 	}
@@ -270,7 +286,7 @@ function updateVideo(){
 		echo '<br><img src="images/progress.gif" height="1" width="'.$train->getProgress().'%">';
 		echo '</div>';
 	}
-
+	
 	$show = isset($_GET['view']) ? $_GET['view'] : "towns";
 	$showOptions = ["Towns","Commodities"]; 
 
