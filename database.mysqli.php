@@ -204,31 +204,32 @@ class DB
 $database = new DB;
 
 function economySQL ($mode, $id) {
-	$STOCKPILE_FACTOR = 0.1;
+	$STOCKPILE_FACTOR = 0.2;
 
 	$col = $mode === "town" ? "a.type" : "b.id AS town_id";
 
 	$supply = "SUM(IFNULL(d.supplies * c.scale, 0)) 
-	+ (b.population / 1e6 * IFNULL(f.supplies, 0))
-	+ IFNULL(g.available, 0) * $STOCKPILE_FACTOR";
+	+ (b.population / 1e6 * IFNULL(f.supplies, 0))";
 
 	$demand = "SUM(IFNULL(d.demands * c.scale, 0)) 
 	+ (b.population / 1e6 * IFNULL(f.demands, 0))";
 
+	$available = "IFNULL(g.available, 0) * $STOCKPILE_FACTOR";
+
 	$price = "(
-		(a.supply_c0 - ($supply)) * a.demand_m
+		(a.supply_c0 - $supply) * a.demand_m
 		-
-		(a.demand_c0 + $demand) * a.supply_m
+		(a.demand_c0 + $demand - $available) * a.supply_m
 	) / ( a.demand_m - a.supply_m ) AS price";
 
-	$available = "IFNULL(e.available,0) AS available";
+	$available_col = "IFNULL(e.available,0) AS available";
 
 	if ($mode === "town") {
-		$cols = "a.type, $price, $available";
+		$cols = "a.type, $price, $available_col";
 	} else if ($mode === "commodity") {
-		$cols = "b.id AS town_id, $price, $available";
+		$cols = "b.id AS town_id, $price, $available_col";
 	} else if ($mode === "supply_demand") {
-		$cols = "a.type, ($supply) AS supply, ($demand) AS demand, $available";
+		$cols = "a.type, ($supply) AS supply, ($demand) AS demand, $available_col";
 	} else {
 		$cols = "*";
 	}

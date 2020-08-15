@@ -1,7 +1,7 @@
 <?php
 
 function updateEconomyVideo () {
-    global $g;
+    global $g, $database;
     
 	$show = isset($_GET['view']) ? $_GET['view'] : "towns";
 	$showOptions = ["Towns","Commodities","Buildings","Demand"]; 
@@ -22,12 +22,16 @@ function updateEconomyVideo () {
 		case "towns":
 			foreach($g->getTowns() as $town){
 				echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['Name'].'</b><br>';
-				echo '<table><tr><th>Name</th><th>Quantity</th><th>Price</th></tr>';
+                echo '<table><tr><th>Name</th><th>Quantity</th><th>Price</th></tr>';
+                $wealth = 0;
 				foreach($g->getCommodities($town['id']) as $commodity){
 					$h = $commodity['surplus'] <= 0 ? 'class="hidden-detail"' : '';
-					echo "<tr $h><td>".$commodity['name'].'</td><td>'.sprintf('%.3f', $commodity['surplus']).'</td><td>$'.sprintf('%.2f', $commodity['price']).'</td></tr>';
+                    echo "<tr $h><td>".$commodity['name'].'</td><td>'.sprintf('%.3f', $commodity['surplus']).'</td><td>$'.sprintf('%.2f', $commodity['price']).'</td></tr>';
+                    $wealth += $commodity['surplus'] * $commodity['price'];
 				}
-				echo '</table></div>';
+                echo '</table>';
+                echo '<dl><dt>Wealth</dt><dd>'.sprintf("$%.02f", $wealth).'</dd><dl>';
+                echo '</div>';
 			}
 		break;
 		case "commodities":

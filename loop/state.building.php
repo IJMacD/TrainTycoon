@@ -35,10 +35,9 @@ function updateBuildingState () {
 					$has_all_consumables = false;
 					$debug->log("Not enough {$rate['commodity']} available for ". $building->getName() . " in " . $town['Name'], 2);
 					// $debug->log(print_r(array_map(function ($r) use ($g) { return $r['demands'] > 0 ? "Needs {$r['demands']} x {$r['commodity']} Available: {$g->getCommodities($town['id'], $rate['commodity'])['surplus']}" : "Supplies {$r['commodity']}"; }, $rates),true),3);
-					
-					// See line 65
+
 					// Adjust scale down
-					$building->setScale($building->getScale() * (1 - $g->dsimtime));
+					downscaleBuilding($building);
 				}
 			}
 
@@ -55,15 +54,25 @@ function updateBuildingState () {
 				$building->addWealth($profit);
 
 				// Adjusting scale proportional to profit
-				$building->setScale($profit * 2 + 1);
+				// but move slowly towards target
+				$target = $profit * 2 + 1;
+				$t = 0.01;
+				$building->setScale((1-$t) * $building->getScale() + $t * $target);
 			}
 			else if ($profit <= 0) {
 				$debug->log($building->getName() . " in " . $town['Name'] ." not operating because there's no profit in it.");
 				$debug->log("Cost $total_cost Revenue $total_revenue Profit $profit", 2);
 
 				// Adjusting scale down
-				$building->setScale($building->getScale() * (1 - $g->dsimtime));
+				downscaleBuilding($building);
 			}
 		}
 	}
+}
+
+function downscaleBuilding ($building) {
+	global $g;
+	$DOWNSCALE_RATE = 0.25;
+
+	$building->setScale($building->getScale() * (1 - $g->dsimtime * $DOWNSCALE_RATE));
 }
