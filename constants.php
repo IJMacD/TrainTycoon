@@ -6,6 +6,8 @@ define("STATE_NORM", 3);
 define("STATE_FAST", 4);
 define("STATE_VFAST", 5);
 
+define("MIN_DELTA", 0.5);
+define("MAX_DELTA", 10);
 define("TIMEOUT", 300);
 define("SPEED_SCALE", 120); // Real Seconds per Sim Hour
 define("TIME_SCALE", 600); // Real Seconds per Sim Year

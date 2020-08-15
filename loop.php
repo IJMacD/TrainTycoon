@@ -49,24 +49,24 @@ function updateInput(){
 // Check state
 function updateState(){
 	global $g;
-	
-	if($g->delta > TIMEOUT){
-		$g->State(STATE_PAUSED);
-	}
-	
-	if($g->State() != STATE_PAUSED){
-		$simstamp = $g->getData('simstamp');
-		$simstamp += $g->dsimtime * 22896000; // Seconds in year
-		//echo $simstamp;
-		$g->setData('simstamp', $simstamp);
-		//$g->setData('date', date('Y-m-d', $simstamp));
-	}
-	
-	updateTrainState();
-	
-	updateBuildingState();
 
-	updateTownState();
+	// Only update real loops
+	// e.g. ignore second viewer updates
+	if ($g->delta > 0) {
+		if($g->State() != STATE_PAUSED){
+			$simstamp = $g->getData('simstamp');
+			$simstamp += $g->dsimtime * 22896000; // Seconds in year
+			//echo $simstamp;
+			$g->setData('simstamp', $simstamp);
+			//$g->setData('date', date('Y-m-d', $simstamp));
+		}
+		
+		updateTrainState();
+		
+		updateBuildingState();
+
+		updateTownState();
+	}
 }
 
 // Update positions

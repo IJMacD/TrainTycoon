@@ -3,8 +3,6 @@ require_once("constants.php");
 require_once("database.php");
 require_once("economy.php");
 
-$MAX_DELTA = 10;
-
 class Game
 {
 	private $data = array();
@@ -28,7 +26,19 @@ class Game
 		
 		$this->lasttime = $this->getData('lasttime');
 		$time = microtime(true);
-		$this->delta = min($time - $this->lasttime, $MAX_DELTA);
+		$this->delta = $time - $this->lasttime;
+	
+		if($this->delta < MIN_DELTA) {
+			// Don't update too frequently e.g. multiple viewers
+			$this->delta = 0;
+		}
+		else if($this->delta > TIMEOUT){
+			$this->State(STATE_PAUSED);
+		}
+		else if($this->delta > MAX_DELTA){
+			$this->delta = MAX_DELTA;
+		}
+
 		$debug->log('Delta: '.$this->delta);	
 		$this->setData('lasttime', $time);
 		$this->dsimtime = $this->delta / TIME_SCALE * $this->Speed();
