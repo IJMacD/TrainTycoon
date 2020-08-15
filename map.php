@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 ini_set("display_errors", 1); 
 require_once("constants.php");
-require_once("database.mysqli.php");
+require_once("database.php");
 require_once("game.php");
 require_once("lang.php");
 require_once("classes/train.class.php");

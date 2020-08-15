@@ -1,16 +1,17 @@
 <?php
 error_reporting(E_ALL);
-ini_set("display_errors", 1); 
-require_once("constants.php");
-require_once("game.php");
-require_once("debug.php");
-require_once("lang.php");
-require_once("classes/train.class.php");
+ini_set("display_errors", 1);
+
+require_once "constants.php";
+require_once "game.php";
+require_once "debug.php";
+require_once "lang.php";
+require_once "classes/train.class.php";
+require_once "classes/building.class.php";
 
 $g = new Game;
 $locos = $g->getLocos();
 $trains = $g->getTrains();
-$buildings = $g->getBuildings();
 $towns = $g->getTowns();
 $stations = $g->getStations();
 
@@ -151,44 +152,59 @@ function updateState(){
 	//updateBuildings()
 	if($g->State() != STATE_PAUSED)
 	{
-		foreach($g->getBuildings() as $building)
+		foreach(Building::getBuildings() as $building)
 		{
-			$town = $g->getTowns($building['town_id']);
+			$town = $building->getTown();
 			$has_all_consumables = true;
 
-			$rates = $database->getProduction($building['type']);
+			$rates = $building->getProductionRates();
 
 			$total_cost = 0;
 			$total_revenue = 0;
-
+			
 			foreach($rates as $rate)
 			{
 				// check all negative rates
 				//		if it is producing it is fine
 				// if it is consuming check there is stock in the town to accomodate
-				$c = $g->getCommodities($building['town_id'], $rate['commodity']);
-
-				$needs = $g->dsimtime * $rate['demands'] * $building['scale'];
-
-				$total_cost += $needs * $c['price'];
-				$total_revenue += $g->dsimtime * $rate['supplies'] * $building['scale'] * $c['price'];
+				$c = $g->getCommodities($town['id'], $rate['commodity']);
 				
-				if($rate['demands'] > 0 && $c['surplus'] < $needs) {
+				$d = $g->dsimtime * $building->getScale();
+
+				$q_demand = $d * $rate['demands'];
+				$q_supply = $d * $rate['supplies'];
+
+				$total_cost += $q_demand * $c['price'];
+				$total_revenue += $q_supply * $c['price'];
+				
+				if($rate['demands'] > 0 && $c['surplus'] < $q_demand) {
 					$has_all_consumables = false;
-					$debug->log("Not enough {$rate['commodity']} available for ". $building['type'] . " at " . $g->getTowns($building['town_id'])['Name'],2);
+					$debug->log("Not enough {$rate['commodity']} available for ". $building->getName() . " in " . $town['Name'], 2);
+					// $debug->log(print_r(array_map(function ($r) use ($g) { return $r['demands'] > 0 ? "Needs {$r['demands']} x {$r['commodity']} Available: {$g->getCommodities($town['id'], $rate['commodity'])['surplus']}" : "Supplies {$r['commodity']}"; }, $rates),true),3);
 				}
 			}
 
-			if($has_all_consumables && $total_revenue > $total_cost)
+			$profit = $total_revenue - $total_cost;
+
+			if($has_all_consumables && $profit > 0)
 			{
 				foreach($rates as $rate)
 				{
 					$delta = $rate['supplies'] > 0 ? $rate['supplies'] : -$rate['demands'];
-					$g->updateCommodities($building['town_id'], $rate['commodity'], ($g->dsimtime * $delta * $building['scale']));
+					$g->updateCommodities($town['id'], $rate['commodity'], ($g->dsimtime * $delta * $building->getScale()));
 				}
+
+				$building->addWealth($profit);
+
+				// Adjusting scale proportional to profit
+				$building->setScale($profit * 2 + 1);
 			}
-			else {
-				if ($total_revenue <= $total_cost) $debug->log($building['type'] . " at " . $g->getTowns($building['town_id'])['Name'] ." not operating because there's no profit in it.");
+			else if ($profit <= 0) {
+				$debug->log($building->getName() . " in " . $town['Name'] ." not operating because there's no profit in it.");
+				$debug->log("Cost $total_cost Revenue $total_revenue Profit $profit", 2);
+
+				// Adjusting scale down
+				$building->setScale($building->getScale() * (1 - $g->dsimtime));
 			}
 		}
 	}
@@ -283,7 +299,7 @@ function updateVideo(){
 				echo " (Value: " . sprintf('$%.2f', $value) . ")";
 			}
 		}
-		echo '<br><img src="images/progress.gif" height="1" width="'.$train->getProgress().'%">';
+		echo '<br><img src="images/progress.gif" height="1" width="'.min($train->getProgress(),100).'%">';
 		echo '</div>';
 	}
 	

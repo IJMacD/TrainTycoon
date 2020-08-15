@@ -162,6 +162,13 @@ class DB
 		$this->trains[$id][$key] = $value;
 	}
 	
+	function updateBuilding($id, $key, $value){
+		$v = $value === NULL ? "NULL" : "'$value'";
+		$q = "UPDATE `".TABLE_buildings."` SET `$key` = $v WHERE `id` = '$id'";
+		$this->query($q);
+		$this->buildings[$id][$key] = $value;
+	}
+	
 	function populateLocosTable(){
 		global $CONST;
 		
@@ -197,7 +204,7 @@ class DB
 $database = new DB;
 
 function economySQL ($mode, $id) {
-	$STOCKPILE_FACTOR = 0.05;
+	$STOCKPILE_FACTOR = 0.1;
 
 	$col = $mode === "town" ? "a.type" : "b.id AS town_id";
 

@@ -1,6 +1,6 @@
 <?php
 require_once("constants.php");
-require_once("database.mysqli.php");
+require_once("database.php");
 require_once("economy.php");
 
 $MAX_DELTA = 10;

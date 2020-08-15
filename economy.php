@@ -1,7 +1,7 @@
 <?php
-require_once("constants.php");
-require_once("database.mysqli.php");
-require_once("debug.php");
+require_once "constants.php";
+require_once "database.php";
+require_once "debug.php";
 
 class Economy {
 	
