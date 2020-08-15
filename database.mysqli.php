@@ -15,14 +15,38 @@ class DB
 		mysqli_select_db($this->connection, DB_NAME) or $this->redirect("Server Error<br>Cannot select database");
     }
 
-	function query($q){
+	function query($q, $params=null){
 		global $debug;
-		$result = mysqli_query($this->connection, $q);
+		if ($params) {
+			$stmt = mysqli_prepare($this->connection, $q);
+			$types = implode("", array_map(function ($p) { return is_int($p) ? "i" : "s"; }, $params));
+			array_unshift($params, $types);
+			$ref = new ReflectionClass("mysqli_stmt");
+			$method = $ref->getMethod("bind_param");
+			$method->invokeArgs($stmt, $params);
+			$stmt->execute();
+		} else {
+			$result = mysqli_query($this->connection, $q);
+		}
 		$debug->log($q, 3);
 		if(mysqli_error($this->connection)){
 			echo mysqli_error($this->connection)."<br>".$q;
 		}
 		return $result;
+	}
+
+	function queryMultiple ($sql) {
+		$statements = explode(";", $sql);
+
+		$this->query("SET autocommit = OFF");
+		$this->query("START TRANSACTION");
+
+		foreach($statements as $statement) {
+			if (strlen($statement) > 0) $this->query($statement);
+		}
+
+		$this->query("COMMIT");
+		$this->query("SET autocommit = ON");
 	}
 	
 	function getData($key){
@@ -72,6 +96,16 @@ class DB
 		}
 		else return $this->trains;
 	}
+
+	function insertTrain ($loco_id, $name) {
+		$q = "INSERT INTO trains (loco_id, Name) VALUES (?, ?)";
+		$this->query($q, [$loco_id, $name]);
+		$id = mysqli_insert_id($this->connection);
+
+		$this->trains[] = ["id"=>$id,"Name"=>$name,"loco_id"=>$loco_id];
+
+		return $id;
+	}
 	
 	function getBuildings(){
 		if(!isset($this->buildings)){
@@ -84,11 +118,21 @@ class DB
 		}
 		return $this->buildings;
 	}
+
+	function insertBuilding ($type, $town_id, $name) {
+		$q = "INSERT INTO buildings (type, town_id, name) VALUES (?, ?, ?)";
+		$this->query($q, [$type, $town_id, $name]);
+		$id = mysqli_insert_id($this->connection);
+
+		$this->buildings[] = ["id"=>$id,"type"=>$type,"town_id"=>$town_id,"name"=>$name,"wealth"=>0,"scale"=>1];
+
+		return $id;
+	}
 	
 	function getTowns($tid = -1){
 		if(!isset($this->towns)){
 			$this->towns = array();
-			$q = "SELECT * FROM `".TABLE_towns."`";
+			$q = "SELECT * FROM `".TABLE_towns."` ORDER BY `Name`";
 			$result = $this->query($q);
 			if($result && $result->num_rows){
 				while($row = $result->fetch_assoc()){$this->towns[$row['id']] = $row;}
@@ -100,13 +144,23 @@ class DB
 	function getStations(){
 		if(!isset($this->stations)){
 			$this->stations = array();
-			$q = "SELECT * FROM `".TABLE_stations."`";
+			$q = "SELECT * FROM `".TABLE_stations."` ORDER BY `Name`";
 			$result = $this->query($q);
 			if($result && $result->num_rows){
-				while($this->stations[] = $result->fetch_assoc());
+				while($row = $result->fetch_assoc()) {$this->stations[] = $row;}
 			}
 		}
 		return $this->stations;
+	}
+
+	function insertStation ($town_id, $name) {
+		$q = "INSERT INTO stations (town_id, Name) VALUES (?, ?)";
+		$this->query($q, [$town_id, $name]);
+		$id = mysqli_insert_id($this->connection);
+
+		$this->stations[] = ["id"=>$id,"town_id"=>$town_id,"Name"=>$name];
+
+		return $id;
 	}
 
 	function getCommodities ($town_id) {
@@ -134,6 +188,14 @@ class DB
 
 	function getCommodityTypes () {
 		$q = "SELECT `type` FROM commodities2 ORDER BY `type`";
+		$r =  $this->query($q);
+		$out = [];
+		while($commodity = $r->fetch_row()) $out[] = $commodity[0];
+		return $out;
+	}
+
+	function getBuildingTypes () {
+		$q = "SELECT `type` FROM production GROUP BY `type` ORDER BY `type`";
 		$r =  $this->query($q);
 		$out = [];
 		while($commodity = $r->fetch_row()) $out[] = $commodity[0];
@@ -199,6 +261,11 @@ class DB
 			ORDER BY `order`";
 		
 		return $this->query($q)->fetch_all(MYSQLI_ASSOC);
+	}
+
+	function addRouteStop ($route_id, $order, $station_id) {
+		$q = "INSERT INTO routes (`train_id`, `order`, `station_id`) VALUES ($route_id, $order, $station_id)";
+		$this->query($q);
 	}
 }
 $database = new DB;

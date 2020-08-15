@@ -1,0 +1,56 @@
+.row {
+	display: flex;
+}
+#trains {
+	flex: 1;
+}
+.train_list{
+	/*height: 80px;
+	width: 520px;*/
+	border: 1px solid #FFAAAA;
+	background: #FFF0F0;
+	margin: 3px;
+	padding: 5px;
+}
+.direction-indicator {
+	font-size: 0.8em;
+	font-weight: bold;
+}
+.economy-list {
+	display: flex;
+	flex-wrap: wrap;
+}
+.town_list {
+	flex: 1;
+	border: 1px solid #AAAAFF;
+	background: #F0F0FF;
+	margin: 3px;
+	padding: 5px;
+}
+.hidden-detail {
+	display: none;
+}
+.full-details .hidden-detail {
+	display: revert;
+}
+#map-holder {
+	overflow: hidden;
+}
+#map {
+	width: 100%;
+	height: 100%;
+}
+#map.zoom {
+	transform: scale(2);
+}
+.edit-box {
+	display: inline-block;
+	border: 1px solid #333;
+	padding: 5px;
+    margin: 3px;
+    vertical-align: top;
+}
+.edit-box label {
+    display: block;
+    padding: 4px;
+}

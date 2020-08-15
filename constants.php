@@ -46,6 +46,7 @@ $CONST['commodities'] = array(
 	"grain" => array("price" => 1, "car_image" => "images/3225c.gif"),
 	"mail" => array("price" => 1, "car_image" => "images/4758b.gif"),
 	"livestock" => array("price" => 1, "car_image" => "images/4564c.gif"),
+	"meat" => array("price" => 1, "car_image" => "images/4563d.gif"),
 	);
 $CONST['station_suffixes'] = array("Central", "Crossing", "Gate", "Junction", "Picadilly", "Priory", "East", "West", "North", "South", "Gap", "New Street", "High Street", "Halt");
 

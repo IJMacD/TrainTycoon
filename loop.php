@@ -13,12 +13,15 @@ require_once "loop/state.building.php";
 require_once "loop/state.town.php";
 require_once "loop/video.train.php";
 require_once "loop/video.economy.php";
+require_once "loop/video.edit.php";
 
 $g = new Game;
 $locos = $g->getLocos();
 $trains = $g->getTrains();
 $towns = $g->getTowns();
 $stations = $g->getStations();
+
+$video = isset($_GET['video']) ? $_GET['video'] : "default";
 
 loop();
 
@@ -37,10 +40,74 @@ function loop(){
 
 // Read Paramaters from query string
 function updateInput(){
-	global $g;
+	global $g, $database, $CONST, $video;
+
 	if(isset($_GET['state'])){
 		if($_GET['state'] == "play") $g->State(STATE_NORM);
 		else if($_GET['state'] == "pause") $g->State(STATE_PAUSED);
+	}
+	
+	if(isset($_GET['action'])) {
+		if ($_GET['action'] == "reset") {
+			$database->queryMultiple("DELETE FROM data; 
+				DELETE FROM availability;
+				UPDATE buildings SET scale = 1, wealth = 0;
+				UPDATE trains SET Car_1 = NULL, Car_2 = NULL, Car_3 = NULL, Car_4 = NULL, Car_5 = NULL, Car_6 = NULL, Car_7 = NULL, Car_8 = NULL;");
+		} else if ($_GET['action'] === "new-station") {
+			$video = "edit";
+
+			$town_id = $_POST['new-station-town'];
+			$name = $_POST['new-station-name'];
+
+			$town = $database->getTowns($town_id);
+			
+			if (!$name) {
+				$r = rand(0, count($CONST['station_suffixes']));
+				$suffix = $r === 0 ? "" : " " . $CONST['station_suffixes'][$r - 1];
+				$name = $town['Name'] . $suffix; 
+			}
+
+			$database->insertStation($town_id, $name);
+
+			echo "<p>New station created in {$town['Name']} called $name</p>";
+		} else if ($_GET['action'] === "new-building") {
+			$video = "edit";
+
+			$type = $_POST['new-building-type'];
+			$town_id = $_POST['new-building-town'];
+			$name = $_POST['new-building-name'];
+
+			$database->insertBuilding($type, $town_id, $name);
+
+			echo "<p>New $type created in {$g->getTowns($town_id)['Name']}</p>";
+		} else if ($_GET['action'] === "new-train") {
+			$video = "edit";
+
+			$loco_id = $_POST['new-train-loco'];
+			$name = $_POST['new-train-name'];
+			$station1_id = $_POST['new-train-station1'];
+			$station2_id = $_POST['new-train-station2'];
+
+			$id = $database->insertTrain($loco_id, $name);
+
+			if ($id) {
+				$database->addRouteStop($id, 1, $station1_id);
+				$database->addRouteStop($id, 2, $station2_id);
+
+				echo "<p>New train created pulled by {$CONST['locos'][$loco_id]['name']}</p>";
+			}
+		} else if ($_GET['action'] === "route-add") {
+			$video = "edit";
+
+			$train_id = $_POST['route-add-train'];
+			$station_id = $_POST['route-add-station'];
+			
+			$train = Train::getTrain($train_id);
+
+			$database->addRouteStop($train->id, count($train->getStations()) + 1, $station_id);
+
+			echo "<p>Added new stop at {$g->getStations($station_id)['Name']} to train " . $train->getName()."</p>";
+		}
 	}
 	
 	$g->init();
@@ -91,7 +158,14 @@ function updateScore(){
 
 // Output XML
 function updateVideo(){
-	global $g, $CONST, $lang, $database;
+	global $video, $g, $CONST, $lang, $database;
+
+	if ($video === "edit") {
+		updateEditVideo();
+
+		return;
+	}
+
 	if($g->State() == STATE_PAUSED) echo '<h1 style="color: red;">'.$lang['en']['paused'].'</h1>';
 	echo "<p>Date: ".date("Y-m-d", $g->getData('simstamp')) . "</p>";
 	echo "<p>Wealth: ". sprintf('$%.2f', $g->getData('wealth')) . "</p>";

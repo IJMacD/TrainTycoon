@@ -98,10 +98,19 @@ class Game
 		return $database->getTowns($tid);
 	}
 	
-	function getStations()
+	function getStations($sid=-1)
 	{
 		global $database;
-		return $database->getStations();
+		$stations = $database->getStations();
+
+		if ($sid > 0) {
+			foreach ($stations as $station) {
+				if ($station['id'] == $sid) return $station;
+			}
+			return null;
+		}
+
+		return $stations;
 	}
 	
 	function getCommodities($town_id, $commodity="")
@@ -121,12 +130,4 @@ class Game
 		global $economy;
 		return $economy->updateCommodities($town_id, $commodity, $dsurplus);
 	}
-
-	function break ($msg = "") {
-		global $debug;
-		$this->hasBreak = true;
-		$this->State(0);
-		$debug->log(strlen($msg) > 0 ? "BREAK - " . $msg : "BREAK");
-	}
 }
-?>

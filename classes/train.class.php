@@ -319,4 +319,15 @@ class Train
 		
 		return Train::$_singleton[$id];
 	}
+
+	static function getTrains () {
+		global $database;
+
+		$out = [];
+		foreach ($database->getTrains() as $train) {
+			$out[] = self::getTrain($train['id']);
+		}
+
+		return $out;
+	}
 }
