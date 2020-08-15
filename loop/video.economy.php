@@ -4,7 +4,7 @@ function updateEconomyVideo () {
     global $g;
     
 	$show = isset($_GET['view']) ? $_GET['view'] : "towns";
-	$showOptions = ["Towns","Commodities","Demand"]; 
+	$showOptions = ["Towns","Commodities","Buildings","Demand"]; 
 
 	echo '<p>';
 	foreach ($showOptions as $o) {
@@ -50,6 +50,18 @@ function updateEconomyVideo () {
 					echo "<tr $h><td>".$commodity['type'].'</td><td>'.sprintf('%.3f', $commodity['supply']).'</td><td>'.sprintf('%.3f', $commodity['demand']).'</td><td>'.sprintf('%.3f', $commodity['available']).'</td></tr>';
 				}
 				echo '</table></div>';
+			}
+		break;
+		case "buildings":
+			foreach(Building::getBuildings() as $building){
+                echo '<div id="building_'.$building->id.'" class="town_list"><b>'.$building->getName().'</b>';
+                $town = $building->getTown();
+                echo '<dl>';
+                echo '<dt>Town</dt><dd>'.$town['Name'].'</dd>';
+                echo '<dt>Wealth</dt><dd>'.sprintf('$%.02f', $building->getWealth()).'</dd>';
+                echo '<dt>Scale</dt><dd>'.sprintf('%.03f', $building->getScale()).'</dd>';
+                echo '</dl>';
+                echo '</div>';
 			}
 		break;
 	}

@@ -35,6 +35,10 @@ function updateBuildingState () {
 					$has_all_consumables = false;
 					$debug->log("Not enough {$rate['commodity']} available for ". $building->getName() . " in " . $town['Name'], 2);
 					// $debug->log(print_r(array_map(function ($r) use ($g) { return $r['demands'] > 0 ? "Needs {$r['demands']} x {$r['commodity']} Available: {$g->getCommodities($town['id'], $rate['commodity'])['surplus']}" : "Supplies {$r['commodity']}"; }, $rates),true),3);
+					
+					// See line 65
+					// Adjust scale down
+					$building->setScale($building->getScale() * (1 - $g->dsimtime));
 				}
 			}
 
