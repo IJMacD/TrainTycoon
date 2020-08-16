@@ -109,7 +109,7 @@ class DB
 	function getBuildings(){
 		if(!isset($this->buildings)){
 			$this->buildings = array();
-			$q = "SELECT * FROM `".TABLE_buildings."`";
+			$q = "SELECT * FROM `".TABLE_buildings."` ORDER BY `name`";
 			$result = $this->query($q);
 			if($result && $result->num_rows){
 				while($row = $result->fetch_assoc()){$this->buildings[$row['id']] = $row;}
@@ -148,14 +148,16 @@ class DB
 		if(!isset($this->stations)){
 			$this->stations = array();
 			$q = "SELECT 
-					`stations`.`id`,
-					`stations`.`Name`,
-					`stations`.`town_id`,
-					COALESCE(`stations`.`lat`, `towns`.`lat`) AS lat,
-					COALESCE(`stations`.`lon`, `towns`.`lon`) AS lon
-				FROM stations
-					LEFT JOIN towns ON stations.town_id = towns.id
-				ORDER BY `stations`.`Name`";
+					`buildings`.`id`,
+					`buildings`.`name`,
+					`buildings`.`town_id`,
+					COALESCE(`buildings`.`lat`, `towns`.`lat`) AS lat,
+					COALESCE(`buildings`.`lon`, `towns`.`lon`) AS lon
+				FROM buildings
+					LEFT JOIN towns ON buildings.town_id = towns.id
+				WHERE
+					`buildings`.`type` = 'station'
+				ORDER BY `buildings`.`name`";
 			$result = $this->query($q);
 			if($result && $result->num_rows){
 				while($row = $result->fetch_assoc()) {
@@ -173,11 +175,11 @@ class DB
 	}
 
 	function insertStation ($town_id, $name) {
-		$q = "INSERT INTO stations (town_id, Name) VALUES (?, ?)";
+		$q = "INSERT INTO buildings (`type`, `town_id`, `name`) VALUES ('station', ?, ?)";
 		$this->query($q, [$town_id, $name]);
 		$id = mysqli_insert_id($this->connection);
 
-		$this->stations[] = ["id"=>$id,"town_id"=>$town_id,"Name"=>$name];
+		$this->stations[] = ["id"=>$id,"town_id"=>$town_id,"name"=>$name];
 
 		return $id;
 	}
@@ -206,7 +208,7 @@ class DB
 	}
 
 	function getCommodityTypes () {
-		$q = "SELECT `type` FROM commodities2 ORDER BY `type`";
+		$q = "SELECT `type` FROM commodities ORDER BY `type`";
 		$r =  $this->query($q);
 		$out = [];
 		while($commodity = $r->fetch_row()) $out[] = $commodity[0];
@@ -266,15 +268,15 @@ class DB
 			`station_id`,
 				CASE WHEN `length` = 0 THEN 1 ELSE `length` END AS length,
 				`station_id`,
-				`stations`.`Name` AS station_name,
+				`buildings`.`name` AS station_name,
 				`town_id`,
 				`towns`.`Name` AS town_name,
-				COALESCE(`stations`.`lat`, `towns`.`lat`) AS lat,
-				COALESCE(`stations`.`lon`, `towns`.`lon`) AS lon,
+				COALESCE(`buildings`.`lat`, `towns`.`lat`) AS lat,
+				COALESCE(`buildings`.`lon`, `towns`.`lon`) AS lon,
 				population
 			FROM routes
-				JOIN stations ON routes.station_id = stations.id
-				JOIN towns ON stations.town_id = towns.id
+				JOIN buildings ON routes.station_id = buildings.id
+				JOIN towns ON buildings.town_id = towns.id
 			WHERE train_id = $route_id
 			ORDER BY `order`";
 		
@@ -328,7 +330,7 @@ function economySQL ($mode, $id) {
 	$sql = "SELECT 
 		$cols
 	FROM
-		commodities2 AS a
+		commodities AS a
 		JOIN towns AS b
 		LEFT JOIN buildings AS c
 			ON c.town_id = b.id 

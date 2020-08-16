@@ -50,7 +50,7 @@ class Station
 
 			$station = $database->getStation($id);
 
-			self::$_singleton[$id]->name = $station['Name'];
+			self::$_singleton[$id]->name = $station['name'];
 			self::$_singleton[$id]->town_id = $station['town_id'];
 			self::$_singleton[$id]->lat = $station['lat'];
 			self::$_singleton[$id]->lon = $station['lon'];

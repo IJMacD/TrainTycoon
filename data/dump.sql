@@ -19,109 +19,251 @@ CREATE TABLE IF NOT EXISTS `availability` (
   PRIMARY KEY (`town_id`,`commodity`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table train_tycoon.availability: ~98 rows (approximately)
+-- Dumping data for table train_tycoon.availability: ~242 rows (approximately)
 /*!40000 ALTER TABLE `availability` DISABLE KEYS */;
 INSERT INTO `availability` (`town_id`, `commodity`, `available`) VALUES
-	(1, 'clothes', 0),
-	(1, 'clothing', 11.1664),
-	(1, 'fabric', 0.212146),
+	(1, 'alcohol', 0.221434),
+	(1, 'clothing', 0.0163874),
+	(1, 'fabric', 0.0000424844),
 	(1, 'furniture', 0),
-	(1, 'mail', 0.450121),
-	(1, 'wool', 7.44334),
-	(2, 'alcohol', 1),
-	(2, 'clothes', 0),
-	(2, 'clothing', 1.51227),
-	(2, 'fabric', 0.780364),
-	(2, 'furniture', 0),
-	(2, 'mail', 0),
-	(3, 'clothes', 0),
+	(1, 'grain', 0.903872),
+	(1, 'livestock', 13),
+	(1, 'logs', 0),
+	(1, 'lumber', 20),
+	(1, 'mail', 0.0598875),
+	(1, 'meat', 1.19509),
+	(1, 'passengers', 0.313939),
+	(1, 'wool', 0.000479083),
+	(2, 'alcohol', 0.000186735),
+	(2, 'clothing', 0.0106757),
+	(2, 'fabric', 0.000924186),
+	(2, 'furniture', 0.0102289),
+	(2, 'livestock', 10),
+	(2, 'logs', 0),
+	(2, 'lumber', 21.5872),
+	(2, 'mail', 0.000193557),
+	(2, 'meat', 0.000799535),
+	(2, 'passengers', 0.0107494),
+	(3, 'alcohol', 0.00689052),
 	(3, 'clothing', 0),
 	(3, 'fabric', 0),
 	(3, 'furniture', 0),
-	(3, 'mail', 0),
-	(4, 'clothes', 0),
+	(3, 'livestock', 10),
+	(3, 'logs', 16.5058),
+	(3, 'lumber', 0.596344),
+	(3, 'mail', 0.00618375),
+	(3, 'meat', 0.00936901),
+	(3, 'passengers', 0.00269018),
+	(4, 'alcohol', 0),
+	(4, 'clothing', 0),
+	(4, 'fabric', 1),
 	(4, 'furniture', 0),
-	(4, 'logs', 15.3503),
-	(5, 'clothes', 0),
+	(4, 'livestock', 12),
+	(4, 'logs', 2.88269),
+	(4, 'lumber', 22),
+	(4, 'mail', 0),
+	(4, 'meat', 0),
+	(4, 'passengers', 0.0156158),
+	(5, 'alcohol', 0),
+	(5, 'clothing', 0),
+	(5, 'fabric', 7),
 	(5, 'furniture', 0),
-	(6, 'alcohol', 0.989094),
-	(6, 'clothes', 0),
-	(6, 'fabric', 5),
+	(5, 'livestock', 14),
+	(5, 'logs', 7),
+	(5, 'lumber', 16),
+	(5, 'mail', 7.92832),
+	(5, 'meat', 0.000204382),
+	(5, 'passengers', 5.78011),
+	(5, 'wool', 2),
+	(6, 'alcohol', 0.0000948929),
+	(6, 'clothing', 0),
+	(6, 'fabric', 11),
 	(6, 'furniture', 0),
-	(6, 'grain', 0.0109057),
-	(6, 'livestock', 1),
-	(6, 'logs', 2),
-	(6, 'mail', 1),
-	(6, 'wool', 2.70071),
-	(7, 'alcohol', 1),
-	(7, 'clothes', 0),
-	(7, 'fabric', 2.03579),
+	(6, 'livestock', 12),
+	(6, 'logs', 1),
+	(6, 'lumber', 10),
+	(6, 'mail', 0.623482),
+	(6, 'meat', 0.0483721),
+	(6, 'passengers', 0.421151),
+	(6, 'wool', 0.119451),
+	(7, 'alcohol', 0.000864422),
+	(7, 'clothing', 0),
+	(7, 'fabric', 0.992351),
 	(7, 'furniture', 0),
-	(7, 'mail', 0),
-	(7, 'wool', 7.92842),
-	(8, 'clothes', 0),
+	(7, 'livestock', 9),
+	(7, 'logs', 4),
+	(7, 'lumber', 14),
+	(7, 'mail', 8.56316),
+	(7, 'meat', 10.7982),
+	(7, 'passengers', 0.00334251),
+	(7, 'wool', 0.00764764),
+	(8, 'alcohol', 0),
 	(8, 'clothing', 0),
+	(8, 'fabric', 0),
 	(8, 'furniture', 0),
-	(9, 'clothes', 0),
+	(8, 'livestock', 14),
+	(8, 'logs', 0),
+	(8, 'lumber', 18),
+	(8, 'mail', 0),
+	(8, 'meat', 0),
+	(8, 'passengers', 0.0159647),
+	(9, 'alcohol', 0),
+	(9, 'clothing', 0),
 	(9, 'furniture', 0),
-	(10, 'clothes', 0),
-	(10, 'fabric', 5),
+	(9, 'mail', 0),
+	(9, 'meat', 0),
+	(10, 'alcohol', 0.000119382),
+	(10, 'clothing', 0),
+	(10, 'fabric', 11),
 	(10, 'furniture', 0),
-	(10, 'grain', 6.45012),
-	(10, 'livestock', 4.72505),
-	(10, 'mail', 3),
-	(10, 'wool', 4.70073),
-	(11, 'clothes', 0),
+	(10, 'grain', 25.773),
+	(10, 'livestock', 115.886),
+	(10, 'logs', 8),
+	(10, 'lumber', 15),
+	(10, 'mail', 0),
+	(10, 'meat', 3.78041),
+	(10, 'passengers', 5.52154),
+	(10, 'wool', 47.5855),
+	(11, 'alcohol', 0),
+	(11, 'clothing', 0),
+	(11, 'fabric', 3),
 	(11, 'furniture', 0),
-	(12, 'clothes', 0),
+	(11, 'grain', 0),
+	(11, 'livestock', 15),
+	(11, 'logs', 3),
+	(11, 'lumber', 14),
+	(11, 'mail', 0),
+	(11, 'meat', 0),
+	(11, 'passengers', 0.399741),
+	(12, 'alcohol', 0),
+	(12, 'clothing', 0),
+	(12, 'fabric', 7),
 	(12, 'furniture', 0),
-	(13, 'clothes', 0),
+	(12, 'grain', 64),
+	(12, 'livestock', 19.6824),
+	(12, 'lumber', 24),
+	(12, 'mail', 0),
+	(12, 'meat', 256.28),
+	(12, 'passengers', 0.934427),
+	(13, 'alcohol', 0.0010432),
+	(13, 'clothing', 0),
+	(13, 'fabric', 8),
 	(13, 'furniture', 0),
-	(14, 'clothes', 0),
-	(14, 'fabric', 1),
+	(13, 'livestock', 15),
+	(13, 'logs', 6),
+	(13, 'lumber', 15),
+	(13, 'mail', 0),
+	(13, 'meat', 0),
+	(13, 'passengers', 0.484702),
+	(14, 'alcohol', 0),
+	(14, 'clothing', 0),
+	(14, 'fabric', 0),
 	(14, 'furniture', 0),
-	(14, 'mail', 3),
-	(14, 'wool', 32.7007),
-	(15, 'alcohol', 2),
-	(15, 'clothes', 0),
+	(14, 'livestock', 8),
+	(14, 'lumber', 7),
+	(14, 'mail', 0),
+	(14, 'meat', 0),
+	(14, 'passengers', 4.87472),
+	(14, 'wool', 7.71243),
+	(15, 'alcohol', 0.000147834),
+	(15, 'clothing', 0.00257728),
+	(15, 'fabric', 0.000000466527),
 	(15, 'furniture', 0),
-	(15, 'logs', 6),
-	(16, 'alcohol', 0.997938),
-	(16, 'clothes', 0),
-	(16, 'fabric', 0),
+	(15, 'livestock', 12),
+	(15, 'logs', 5),
+	(15, 'lumber', 16),
+	(15, 'mail', 0),
+	(15, 'meat', 0.173903),
+	(15, 'passengers', 0.014418),
+	(16, 'alcohol', 59.0397),
+	(16, 'clothing', 0),
+	(16, 'fabric', 14),
 	(16, 'furniture', 0),
-	(16, 'grain', 0.00206252),
-	(16, 'livestock', 2),
-	(16, 'logs', 0),
-	(16, 'wool', 11),
-	(17, 'clothes', 0),
+	(16, 'grain', 0.00238155),
+	(16, 'livestock', 23.9334),
+	(16, 'logs', 7),
+	(16, 'lumber', 10),
+	(16, 'mail', 0.0000645251),
+	(16, 'meat', 91.8855),
+	(16, 'passengers', 1.89243),
+	(16, 'wool', 4),
+	(17, 'alcohol', 0),
+	(17, 'clothing', 0),
+	(17, 'fabric', 0),
 	(17, 'furniture', 0),
-	(17, 'logs', 5),
-	(18, 'clothes', 0),
+	(17, 'livestock', 11),
+	(17, 'logs', 9),
+	(17, 'lumber', 17),
+	(17, 'mail', 0),
+	(17, 'meat', 0),
+	(17, 'passengers', 0.0066572),
+	(18, 'alcohol', 0),
+	(18, 'clothing', 0),
 	(18, 'fabric', 0),
 	(18, 'furniture', 0),
+	(18, 'livestock', 14),
+	(18, 'lumber', 17),
 	(18, 'mail', 0),
+	(18, 'meat', 0),
+	(18, 'passengers', 0.00711084),
 	(18, 'wool', 0),
-	(19, 'clothes', 0),
+	(19, 'alcohol', 0),
+	(19, 'clothing', 0),
+	(19, 'fabric', 3),
 	(19, 'furniture', 0),
-	(19, 'grain', 9.45011),
-	(19, 'livestock', 4.72505),
-	(20, 'clothes', 0),
+	(19, 'grain', 1.63655),
+	(19, 'livestock', 6.17676),
+	(19, 'logs', 5),
+	(19, 'lumber', 17),
+	(19, 'mail', 0),
+	(19, 'meat', 0.00262192),
+	(19, 'passengers', 1.1986),
+	(20, 'alcohol', 0),
+	(20, 'clothing', 0),
 	(20, 'furniture', 0),
-	(21, 'clothes', 0),
+	(20, 'mail', 0),
+	(20, 'meat', 0),
+	(21, 'alcohol', 0),
+	(21, 'clothing', 0),
 	(21, 'furniture', 0),
-	(22, 'alcohol', 4),
-	(22, 'clothes', 0),
-	(22, 'fabric', 2),
+	(21, 'livestock', 16),
+	(21, 'logs', 49),
+	(21, 'lumber', 16),
+	(21, 'mail', 0),
+	(21, 'meat', 0),
+	(21, 'passengers', 2.598),
+	(22, 'alcohol', 0.00142138),
+	(22, 'clothing', 0),
+	(22, 'fabric', 6),
 	(22, 'furniture', 0),
-	(22, 'grain', 2.45012),
-	(22, 'livestock', 1.72506),
-	(22, 'wool', 18),
-	(23, 'clothes', 0),
+	(22, 'grain', 34.6516),
+	(22, 'livestock', 109.668),
+	(22, 'logs', 14),
+	(22, 'lumber', 16),
+	(22, 'mail', 0),
+	(22, 'meat', 13.6203),
+	(22, 'passengers', 3.01752),
+	(22, 'wool', 54),
+	(23, 'alcohol', 0),
+	(23, 'clothing', 0),
 	(23, 'fabric', 0),
 	(23, 'furniture', 0),
+	(23, 'livestock', 9),
+	(23, 'lumber', 13),
 	(23, 'mail', 0),
-	(23, 'wool', 8);
+	(23, 'meat', 0),
+	(23, 'passengers', 1.60823),
+	(23, 'wool', 5),
+	(24, 'alcohol', 0.000385236),
+	(24, 'clothing', 0),
+	(24, 'fabric', 0),
+	(24, 'furniture', 0),
+	(24, 'livestock', 7),
+	(24, 'logs', 6),
+	(24, 'lumber', 14),
+	(24, 'mail', 0),
+	(24, 'meat', 0.441186),
+	(24, 'passengers', 1.12463);
 /*!40000 ALTER TABLE `availability` ENABLE KEYS */;
 
 -- Dumping structure for table train_tycoon.buildings
@@ -132,34 +274,101 @@ CREATE TABLE IF NOT EXISTS `buildings` (
   `name` varchar(50) DEFAULT NULL,
   `wealth` float DEFAULT 0,
   `scale` float DEFAULT 1,
+  `lat` float DEFAULT NULL,
+  `lon` float DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=60 DEFAULT CHARSET=latin1;
 
--- Dumping data for table train_tycoon.buildings: 18 rows
+-- Dumping data for table train_tycoon.buildings: 44 rows
 /*!40000 ALTER TABLE `buildings` DISABLE KEYS */;
-INSERT INTO `buildings` (`id`, `town_id`, `type`, `name`, `wealth`, `scale`) VALUES
-	(2, 2, 'tailor', NULL, 0, 1),
-	(3, 1, 'textiles', NULL, 0, 2),
-	(8, 14, 'sheep_farm', NULL, 0, 1),
-	(10, 1, 'distillery', NULL, 0, 1),
-	(13, 1, 'post_office', NULL, 0, 1),
-	(12, 15, 'tailor', NULL, 0, 1),
-	(14, 4, 'forest', NULL, 0, 1),
-	(15, 3, 'lumber_mill', NULL, 0, 1),
-	(16, 2, 'carpenter', NULL, 0, 1),
-	(17, 6, 'sheep_farm', NULL, 0, 1),
-	(18, 7, 'textiles', NULL, 0, 1),
-	(19, 10, 'sheep_farm', NULL, 0, 1),
-	(21, 1, 'tailor', NULL, 0, 1),
-	(22, 10, 'farm', NULL, 0, 1),
-	(23, 19, 'farm', NULL, 0, 1),
-	(24, 22, 'farm', NULL, 0, 1),
-	(25, 6, 'distillery', NULL, 0, 1),
-	(26, 16, 'distillery', NULL, 0, 1);
+INSERT INTO `buildings` (`id`, `town_id`, `type`, `name`, `wealth`, `scale`, `lat`, `lon`) VALUES
+	(32, 2, 'tailor', NULL, 576.278, 0.488155, NULL, NULL),
+	(33, 1, 'textiles', NULL, 1148.11, 0.574207, NULL, NULL),
+	(38, 14, 'sheep_farm', NULL, 1092.96, 1.09548, NULL, NULL),
+	(40, 1, 'distillery', NULL, 10173.1, 2.84843, NULL, NULL),
+	(43, 1, 'post_office', NULL, 12685.7, 2.16563, NULL, NULL),
+	(42, 15, 'tailor', NULL, 378.495, 0.00886874, NULL, NULL),
+	(44, 4, 'forest', NULL, 13310.4, 2.2375, NULL, NULL),
+	(45, 3, 'lumber_mill', NULL, 229.161, 1.04437, NULL, NULL),
+	(46, 2, 'carpenter', NULL, 964.221, 1.09766, NULL, NULL),
+	(47, 6, 'sheep_farm', NULL, 1140.68, 1.10091, NULL, NULL),
+	(48, 7, 'textiles', NULL, 1230.63, 1.06982, NULL, NULL),
+	(49, 10, 'sheep_farm', NULL, 941.22, 1.064, NULL, NULL),
+	(51, 1, 'tailor', NULL, 930.832, 0.52238, NULL, NULL),
+	(52, 10, 'farm', NULL, 14187.2, 1.26885, NULL, NULL),
+	(53, 19, 'farm', NULL, 16201.1, 1.47851, NULL, NULL),
+	(54, 22, 'farm', NULL, 14027.6, 1.27154, NULL, NULL),
+	(55, 6, 'distillery', NULL, 0, 2.26208e-16, NULL, NULL),
+	(56, 16, 'distillery', NULL, 3596.27, 1.53769, NULL, NULL),
+	(57, 6, 'post_office', NULL, 9216.63, 1.8355, NULL, NULL),
+	(58, 12, 'abattoir', '', 5172.37, 1.15221, NULL, NULL),
+	(59, 16, 'abattoir', 'Ronnie\'s Abattoir', 4777.69, 2.58492, NULL, NULL),
+	(1, 1, 'station', 'London Euston', 214.46, 1.38245, 51, 1),
+	(2, 2, 'station', 'Manchester Picadilly', 183.916, 1.32589, 53, -2),
+	(3, 3, 'station', 'Birmingham New Street', 187.549, 1.33263, 52, -2),
+	(4, 4, 'station', 'Nottingham Gate', 180.663, 1.31985, 52, -1),
+	(5, 8, 'station', 'Liverpool Gap', 182.918, 1.32407, NULL, NULL),
+	(6, 17, 'station', 'Sheffield Halt', 180.775, 1.32008, NULL, NULL),
+	(7, 15, 'station', 'Leeds Central', 182.976, 1.32441, NULL, NULL),
+	(8, 16, 'station', 'Newcastle Priory', 180.765, 1.31902, NULL, NULL),
+	(9, 7, 'station', 'Glasgow East', 180.222, 1.31908, NULL, NULL),
+	(10, 10, 'station', 'Cambridge Junction', 174.48, 1.30596, NULL, NULL),
+	(11, 22, 'station', 'Middlesbrough Crossing', 176.945, 1.31166, NULL, NULL),
+	(12, 6, 'station', 'Waverley', 177.678, 1.31452, NULL, NULL),
+	(13, 14, 'station', 'Plymouth Junction', 175.118, 1.30741, NULL, NULL),
+	(14, 23, 'station', 'Bournmouth Halt', 176.888, 1.31243, NULL, NULL),
+	(15, 18, 'station', 'Portsmouth Central', 180.701, 1.31993, NULL, NULL),
+	(16, 13, 'station', 'Brighton Priory', 177.917, 1.31483, NULL, NULL),
+	(17, 19, 'station', 'Bristol Central', 178.738, 1.31574, NULL, NULL),
+	(18, 12, 'station', 'Cardiff North', 179.01, 1.31636, NULL, NULL),
+	(19, 11, 'station', 'Oxford Crossing', 175.848, 1.31102, NULL, NULL),
+	(20, 1, 'station', 'London Central', 214.465, 1.38245, NULL, NULL),
+	(21, 21, 'station', 'Leicester', 177.366, 1.31255, NULL, NULL),
+	(22, 24, 'station', 'York West', 175.951, 1.31052, NULL, NULL),
+	(23, 5, 'station', 'Inverness Gap', 174.237, 1.30536, NULL, NULL);
 /*!40000 ALTER TABLE `buildings` ENABLE KEYS */;
 
 -- Dumping structure for table train_tycoon.commodities
 CREATE TABLE IF NOT EXISTS `commodities` (
+  `type` varchar(50) NOT NULL,
+  `supply_m` float DEFAULT -1,
+  `supply_c0` float DEFAULT 50,
+  `demand_m` float DEFAULT 1,
+  `demand_c0` float DEFAULT 0,
+  PRIMARY KEY (`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Dumping data for table train_tycoon.commodities: ~24 rows (approximately)
+/*!40000 ALTER TABLE `commodities` DISABLE KEYS */;
+INSERT INTO `commodities` (`type`, `supply_m`, `supply_c0`, `demand_m`, `demand_c0`) VALUES
+	('alcohol', -0.7, 80, 1, 0),
+	('clothing', -0.7, 65, 1, 0),
+	('coal', -0.7, 50, 1, 0),
+	('corn', -0.7, 50, 1, 0),
+	('cotton', -0.7, 50, 1, 0),
+	('fabric', -0.7, 50, 1, 0),
+	('furniture', -0.7, 70, 1, 0),
+	('goods', -0.7, 50, 1, 0),
+	('grain', -0.7, 25, 1, 0),
+	('iron', -0.7, 50, 1, 0),
+	('livestock', -0.7, 25, 1, 0),
+	('logs', -0.7, 45, 1, 0),
+	('lumber', -0.7, 55, 1, 0),
+	('mail', -0.7, 50, 1, 0),
+	('meat', -0.7, 50, 1, 0),
+	('milk', -0.7, 50, 1, 0),
+	('papers', -0.7, 50, 1, 0),
+	('passengers', -0.7, 50, 1, 0),
+	('produce', -0.7, 50, 1, 0),
+	('pulpwood', -0.7, 50, 1, 0),
+	('sugar', -0.7, 50, 1, 0),
+	('type', -0.7, 50, 1, 0),
+	('wood', -0.7, 50, 1, 0),
+	('wool', -0.7, 20, 1, 0);
+/*!40000 ALTER TABLE `commodities` ENABLE KEYS */;
+
+-- Dumping structure for table train_tycoon.commodities_old
+CREATE TABLE IF NOT EXISTS `commodities_old` (
   `town_id` int(11) NOT NULL,
   `commodity` varchar(256) NOT NULL,
   `surplus` float NOT NULL DEFAULT 0,
@@ -168,9 +377,9 @@ CREATE TABLE IF NOT EXISTS `commodities` (
   PRIMARY KEY (`town_id`,`commodity`) USING BTREE
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
--- Dumping data for table train_tycoon.commodities: 106 rows
-/*!40000 ALTER TABLE `commodities` DISABLE KEYS */;
-INSERT INTO `commodities` (`town_id`, `commodity`, `surplus`, `price`, `demand`) VALUES
+-- Dumping data for table train_tycoon.commodities_old: 106 rows
+/*!40000 ALTER TABLE `commodities_old` DISABLE KEYS */;
+INSERT INTO `commodities_old` (`town_id`, `commodity`, `surplus`, `price`, `demand`) VALUES
 	(1, 'furniture', 200, 0.294714, 200),
 	(1, 'clothes', 244.927, 0.609848, 244.925),
 	(2, 'furniture', 200, 0.279203, 200),
@@ -277,46 +486,7 @@ INSERT INTO `commodities` (`town_id`, `commodity`, `surplus`, `price`, `demand`)
 	(14, 'fabric', 200, 0.538238, 200),
 	(14, 'timber', 200, 0.19154, 200),
 	(14, 'logs', 200, 0.216687, 200);
-/*!40000 ALTER TABLE `commodities` ENABLE KEYS */;
-
--- Dumping structure for table train_tycoon.commodities2
-CREATE TABLE IF NOT EXISTS `commodities2` (
-  `type` varchar(50) NOT NULL,
-  `supply_m` float DEFAULT -1,
-  `supply_c0` float DEFAULT 50,
-  `demand_m` float DEFAULT 1,
-  `demand_c0` float DEFAULT 0,
-  PRIMARY KEY (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- Dumping data for table train_tycoon.commodities2: ~24 rows (approximately)
-/*!40000 ALTER TABLE `commodities2` DISABLE KEYS */;
-INSERT INTO `commodities2` (`type`, `supply_m`, `supply_c0`, `demand_m`, `demand_c0`) VALUES
-	('alcohol', -0.7, 60, 1, 0),
-	('clothing', -0.7, 50, 1, 0),
-	('coal', -0.7, 50, 1, 0),
-	('corn', -0.7, 50, 1, 0),
-	('cotton', -0.7, 50, 1, 0),
-	('fabric', -0.7, 50, 1, 0),
-	('furniture', -0.7, 50, 1, 0),
-	('goods', -0.7, 50, 1, 0),
-	('grain', -0.7, 50, 1, 0),
-	('iron', -0.7, 50, 1, 0),
-	('livestock', -0.7, 50, 1, 0),
-	('logs', -0.7, 50, 1, 0),
-	('lumber', -0.7, 50, 1, 0),
-	('mail', -0.7, 50, 1, 0),
-	('meat', -0.7, 50, 1, 0),
-	('milk', -0.7, 50, 1, 0),
-	('papers', -0.7, 50, 1, 0),
-	('passengers', -0.7, 50, 1, 0),
-	('produce', -0.7, 50, 1, 0),
-	('pulpwood', -0.7, 50, 1, 0),
-	('sugar', -0.7, 50, 1, 0),
-	('type', -0.7, 50, 1, 0),
-	('wood', -0.7, 50, 1, 0),
-	('wool', -0.7, 50, 1, 0);
-/*!40000 ALTER TABLE `commodities2` ENABLE KEYS */;
+/*!40000 ALTER TABLE `commodities_old` ENABLE KEYS */;
 
 -- Dumping structure for table train_tycoon.data
 CREATE TABLE IF NOT EXISTS `data` (
@@ -328,10 +498,10 @@ CREATE TABLE IF NOT EXISTS `data` (
 -- Dumping data for table train_tycoon.data: 4 rows
 /*!40000 ALTER TABLE `data` DISABLE KEYS */;
 INSERT INTO `data` (`key`, `value`) VALUES
-	('wealth', '2031.1679047574'),
-	('lasttime', '1597336005.0325'),
+	('lasttime', '1597557681.1829'),
 	('gameState', '3'),
-	('simstamp', '-1153580288.3637');
+	('simstamp', '893333330.78304'),
+	('wealth', '53298.785559306');
 /*!40000 ALTER TABLE `data` ENABLE KEYS */;
 
 -- Dumping structure for table train_tycoon.locos
@@ -357,14 +527,14 @@ CREATE TABLE IF NOT EXISTS `production` (
   PRIMARY KEY (`type`,`commodity`) USING BTREE
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='Constants stored in database for joining.';
 
--- Dumping data for table train_tycoon.production: 18 rows
+-- Dumping data for table train_tycoon.production: 24 rows
 /*!40000 ALTER TABLE `production` DISABLE KEYS */;
 INSERT INTO `production` (`type`, `commodity`, `supplies`, `demands`) VALUES
-	('sheep_farm', 'wool', 8, 0),
-	('textiles', 'wool', 0, 6),
+	('sheep_farm', 'wool', 1, 0),
+	('textiles', 'wool', 0, 4),
 	('textiles', 'fabric', 4, 0),
-	('tailor', 'fabric', 0, 3),
-	('tailor', 'clothing', 2, 0),
+	('tailor', 'fabric', 0, 1),
+	('tailor', 'clothing', 1, 0),
 	('forest', 'logs', 3, 0),
 	('population', 'clothing', 0, 4),
 	('population', 'furniture', 0, 1),
@@ -376,9 +546,14 @@ INSERT INTO `production` (`type`, `commodity`, `supplies`, `demands`) VALUES
 	('farm', 'livestock', 1, 0),
 	('abattoir', 'livestock', 0, 1),
 	('abattoir', 'meat', 9, 0),
-	('lumber_mill', 'logs', 6, 0),
-	('lumber_mill', 'lumber', 0, 6),
-	('population', 'mail', 1, 0);
+	('lumber_mill', 'logs', 0, 6),
+	('lumber_mill', 'lumber', 6, 0),
+	('population', 'mail', 0, 1),
+	('carpenter', 'lumber', 0, 1),
+	('carpenter', 'furniture', 1, 0),
+	('population', 'meat', 0, 2),
+	('station', 'passengers', 1, 0),
+	('population', 'passengers', 0, 1);
 /*!40000 ALTER TABLE `production` ENABLE KEYS */;
 
 -- Dumping structure for table train_tycoon.routes
@@ -390,53 +565,71 @@ CREATE TABLE IF NOT EXISTS `routes` (
   PRIMARY KEY (`train_id`,`order`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
--- Dumping data for table train_tycoon.routes: 29 rows
+-- Dumping data for table train_tycoon.routes: 47 rows
 /*!40000 ALTER TABLE `routes` DISABLE KEYS */;
 INSERT INTO `routes` (`train_id`, `order`, `station_id`, `length`) VALUES
-	(4, 3, 11, 10),
-	(1, 1, 1, 10),
-	(1, 2, 3, 10),
-	(3, 1, 1, 10),
-	(3, 2, 3, 10),
-	(1, 3, 2, 10),
-	(2, 1, 2, 10),
-	(2, 2, 3, 10),
-	(1, 4, 9, 10),
-	(2, 3, 4, 10),
-	(2, 4, 6, 10),
-	(3, 3, 5, 10),
-	(3, 4, 2, 10),
-	(2, 5, 7, 10),
-	(2, 6, 8, 10),
-	(4, 1, 1, 10),
-	(4, 2, 10, 10),
-	(4, 4, 8, 10),
-	(4, 5, 12, 10),
-	(5, 1, 5, 10),
-	(5, 2, 2, 10),
-	(5, 3, 7, 10),
-	(6, 1, 9, 10),
-	(6, 2, 12, 10),
-	(3, 5, 3, 10),
-	(7, 1, 1, 10),
-	(7, 2, 15, 10),
-	(7, 3, 14, 10),
-	(7, 4, 13, 10);
+	(4, 2, 11, 2.78338),
+	(1, 0, 1, 2.35532),
+	(1, 1, 3, 2.35532),
+	(3, 0, 1, 2.35532),
+	(3, 1, 3, 2.35532),
+	(1, 2, 2, 1.11195),
+	(2, 0, 2, 1.11195),
+	(2, 1, 3, 1.11195),
+	(1, 3, 9, 3.5016),
+	(2, 2, 4, 0.684579),
+	(2, 3, 6, 1.56805),
+	(3, 2, 5, 1.70258),
+	(3, 3, 2, 0.801478),
+	(2, 4, 7, 0.469589),
+	(2, 5, 8, 1.31007),
+	(4, 0, 1, 1.47106),
+	(4, 1, 10, 1.47106),
+	(4, 3, 8, 0.51203),
+	(4, 4, 12, 1.46807),
+	(5, 0, 5, 0.801478),
+	(5, 1, 2, 0.801478),
+	(5, 2, 7, 0.939282),
+	(6, 1, 9, 0.670195),
+	(6, 0, 12, 0.670195),
+	(3, 4, 3, 1.11195),
+	(7, 0, 1, 1.47756),
+	(7, 1, 15, 1.47756),
+	(7, 2, 14, 0.56864),
+	(7, 3, 13, 1.64319),
+	(8, 0, 1, 2.54872),
+	(9, 0, 20, 0.833824),
+	(8, 1, 17, 2.54872),
+	(8, 2, 18, 0.410625),
+	(9, 1, 19, 0.833824),
+	(9, 2, 17, 0.97641),
+	(10, 0, 21, 0.714549),
+	(10, 1, 4, 0.714549),
+	(10, 2, 6, 1.56805),
+	(10, 3, 7, 0.469589),
+	(12, 0, 20, 0.753443),
+	(11, 0, 20, 2.80891),
+	(11, 1, 22, 2.80891),
+	(11, 2, 8, 1.18614),
+	(11, 3, 12, 1.46807),
+	(11, 4, 23, 1.80925),
+	(12, 1, 16, 0.753443),
+	(5, 3, 22, 0.353719);
 /*!40000 ALTER TABLE `routes` ENABLE KEYS */;
 
--- Dumping structure for table train_tycoon.stations
-CREATE TABLE IF NOT EXISTS `stations` (
+-- Dumping structure for table train_tycoon.stations_old
+CREATE TABLE IF NOT EXISTS `stations_old` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `Name` varchar(256) NOT NULL,
   `town_id` int(11) NOT NULL,
   `lat` float DEFAULT NULL,
   `lon` float DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
 
--- Dumping data for table train_tycoon.stations: 15 rows
-/*!40000 ALTER TABLE `stations` DISABLE KEYS */;
-INSERT INTO `stations` (`id`, `Name`, `town_id`, `lat`, `lon`) VALUES
+-- Dumping data for table train_tycoon.stations_old: 23 rows
+/*!40000 ALTER TABLE `stations_old` DISABLE KEYS */;
+INSERT INTO `stations_old` (`id`, `Name`, `town_id`, `lat`, `lon`) VALUES
 	(1, 'London Euston', 1, 51, 1),
 	(2, 'Manchester Picadilly', 2, 53, -2),
 	(3, 'Birmingham New Street', 3, 52, -2),
@@ -451,8 +644,16 @@ INSERT INTO `stations` (`id`, `Name`, `town_id`, `lat`, `lon`) VALUES
 	(12, 'Waverley', 6, NULL, NULL),
 	(13, 'Plymouth Junction', 14, NULL, NULL),
 	(14, 'Bournmouth Halt', 23, NULL, NULL),
-	(15, 'Portsmouth Central', 18, NULL, NULL);
-/*!40000 ALTER TABLE `stations` ENABLE KEYS */;
+	(15, 'Portsmouth Central', 18, NULL, NULL),
+	(16, 'Brighton Priory', 13, NULL, NULL),
+	(17, 'Bristol Central', 19, NULL, NULL),
+	(18, 'Cardiff North', 12, NULL, NULL),
+	(19, 'Oxford Crossing', 11, NULL, NULL),
+	(20, 'London Central', 1, NULL, NULL),
+	(21, 'Leicester', 21, NULL, NULL),
+	(22, 'York West', 24, NULL, NULL),
+	(23, 'Inverness Gap', 5, NULL, NULL);
+/*!40000 ALTER TABLE `stations_old` ENABLE KEYS */;
 
 -- Dumping structure for table train_tycoon.towns
 CREATE TABLE IF NOT EXISTS `towns` (
@@ -485,9 +686,9 @@ CREATE TABLE IF NOT EXISTS `towns` (
   `wood` float NOT NULL DEFAULT 0,
   `wool` float DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
 
--- Dumping data for table train_tycoon.towns: 23 rows
+-- Dumping data for table train_tycoon.towns: 24 rows
 /*!40000 ALTER TABLE `towns` DISABLE KEYS */;
 INSERT INTO `towns` (`id`, `Name`, `lat`, `lon`, `population`, `alcohol`, `clothing`, `coal`, `corn`, `cotton`, `goods`, `grain`, `fabric`, `furniture`, `iron`, `livestock`, `logs`, `lumber`, `mail`, `meat`, `milk`, `papers`, `passengers`, `produce`, `pulpwood`, `sugar`, `wood`, `wool`) VALUES
 	(1, 'London', 51.5, -0.12, 13709000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -512,7 +713,8 @@ INSERT INTO `towns` (`id`, `Name`, `lat`, `lon`, `population`, `alcohol`, `cloth
 	(20, 'Belfast', 54.5973, -5.9301, 799000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 	(21, 'Leicester', 52.6369, -1.1398, 745000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 	(22, 'Middlesbrough', 54.5742, -1.235, 656000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-	(23, 'Bournemouth', 50.7192, -1.8808, 531000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	(23, 'Bournemouth', 50.7192, -1.8808, 531000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+	(24, 'York', 53.9583, -1.08028, 210618, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 /*!40000 ALTER TABLE `towns` ENABLE KEYS */;
 
 -- Dumping structure for table train_tycoon.tracks
@@ -549,10 +751,9 @@ CREATE TABLE IF NOT EXISTS `tracks2` (
 -- Dumping structure for table train_tycoon.trains
 CREATE TABLE IF NOT EXISTS `trains` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `Name` varchar(256) NOT NULL,
+  `Name` varchar(50) DEFAULT NULL,
   `loco_id` int(11) NOT NULL,
   `create_date` varchar(32) NOT NULL DEFAULT unix_timestamp(),
-  `route_id` int(11) NOT NULL,
   `segment` int(11) NOT NULL DEFAULT 0,
   `progress` float NOT NULL DEFAULT 0,
   `loading_timeout` float NOT NULL DEFAULT 0,
@@ -571,18 +772,23 @@ CREATE TABLE IF NOT EXISTS `trains` (
   `Car_7` varchar(256) DEFAULT NULL,
   `Car_8` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
 
--- Dumping data for table train_tycoon.trains: 7 rows
+-- Dumping data for table train_tycoon.trains: 12 rows
 /*!40000 ALTER TABLE `trains` DISABLE KEYS */;
-INSERT INTO `trains` (`id`, `Name`, `loco_id`, `create_date`, `route_id`, `segment`, `progress`, `loading_timeout`, `oil`, `water`, `sand`, `direction`, `speed`, `priority`, `Car_1`, `Car_2`, `Car_3`, `Car_4`, `Car_5`, `Car_6`, `Car_7`, `Car_8`) VALUES
-	(1, 'Train 1', 1, '', 1, 1, 27.3828, 0, 100, 100, 100, 1, 150, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(3, 'Train 3', 2, '1391961316', 2, 2, 0, 0, 100, 100, 100, 1, 100, 0, 'mail', 'mail', NULL, NULL, NULL, NULL, NULL, NULL),
-	(2, 'Train 2', 2, '1392039137', 3, 1, 100, 0, 100, 100, 100, -1, 100, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(4, 'Flying Scotsman', 1, '1597149086', 4, 1, 71.8776, 0, 100, 100, 100, 1, 170, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(5, 'Cross Pennine', 2, '1597149946', 5, 2, 85.5866, 0, 100, 100, 100, -1, 100, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(6, 'Scottish Borders', 2, '1597150161', 6, 1, 0, 0, 100, 100, 100, 1, 100, 0, 'fabric', 'fabric', NULL, NULL, NULL, NULL, NULL, NULL),
-	(7, 'West Country Flier', 2, '1597239619', 7, 2, 0, 0, 100, 100, 100, 1, 100, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `trains` (`id`, `Name`, `loco_id`, `create_date`, `segment`, `progress`, `loading_timeout`, `oil`, `water`, `sand`, `direction`, `speed`, `priority`, `Car_1`, `Car_2`, `Car_3`, `Car_4`, `Car_5`, `Car_6`, `Car_7`, `Car_8`) VALUES
+	(1, NULL, 1, '', 3, 94.5648, 0, 100, 100, 100, -1, 150, 0, 'meat', 'meat', 'meat', 'meat', 'meat', 'meat', 'meat', 'meat'),
+	(3, NULL, 2, '1391961316', 2, 28.3941, 0, 100, 100, 100, 1, 100, 0, 'lumber', 'lumber', 'lumber', NULL, NULL, NULL, NULL, NULL),
+	(2, NULL, 2, '1392039137', 5, 9.68517, 0, 100, 100, 100, 1, 100, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(4, 'Flying Scotsman', 1, '1597149086', 1, 60.452, 0, 100, 100, 100, -1, 170, 0, 'grain', 'grain', 'grain', 'grain', 'grain', 'grain', 'grain', 'grain'),
+	(5, 'Cross Pennine', 2, '1597149946', 2, 75.2085, 0, 100, 100, 100, 1, 100, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(6, 'Scottish Borders', 2, '1597150161', 1, 87.4089, 0, 100, 100, 100, 1, 100, 0, 'wool', 'mail', NULL, NULL, NULL, NULL, NULL, NULL),
+	(7, 'West Country Flier', 2, '1597239619', 3, 84.6638, 0, 100, 100, 100, 1, 100, 0, 'fabric', 'fabric', 'fabric', 'fabric', 'fabric', 'fabric', 'fabric', NULL),
+	(8, NULL, 2, '1597497416', 1, 62.5686, 0, 100, 100, 100, 1, 100, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(11, 'Highland Sleeper', 1, '1597510215', 2, 100, 0.00700886, 100, 100, 100, 1, 100, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(10, 'Yorkshire Stunner', 1, '1597509770', 3, 94.1865, 0, 100, 100, 100, -1, 100, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(9, NULL, 1, '1597509485', 1, 62.2272, 0, 100, 100, 100, 1, 100, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(12, 'Brighton Shuttle', 2, '1597511324', 1, 6.40911, 0, 100, 100, 100, 1, 100, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 /*!40000 ALTER TABLE `trains` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

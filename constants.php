@@ -33,7 +33,7 @@ $CONST['locos'] = array(
 	);
 $CONST['commodities'] = array(
 	"alcohol" => array("price" => 5, "car_image" => "images/4537.gif"),
-	"clothing" => array("price" => 3, "car_image" => "images/10194b.gif"),
+	"clothing" => array("price" => 3, "car_image" => "images/4564c.gif"),
 	"coal" => array("price" => 3, "car_image" => "images/10183c.gif"),
 	"cotton" => array("price" => 1, "car_image" => "images/4512c.gif"),
 	"fabric" => array("price" => 2, "car_image" => "images/a_10017_1.gif"),
@@ -45,7 +45,7 @@ $CONST['commodities'] = array(
 	"furniture" => array("price" => 1, "car_image" => "images/4563d.gif"),
 	"grain" => array("price" => 1, "car_image" => "images/3225c.gif"),
 	"mail" => array("price" => 1, "car_image" => "images/4758b.gif"),
-	"livestock" => array("price" => 1, "car_image" => "images/4564c.gif"),
+	"livestock" => array("price" => 1, "car_image" => "images/60052c.gif"),
 	"meat" => array("price" => 1, "car_image" => "images/4563d.gif"),
 	);
 $CONST['station_suffixes'] = array("Central", "Crossing", "Gate", "Junction", "Picadilly", "Priory", "East", "West", "North", "South", "Gap", "New Street", "High Street", "Halt");
