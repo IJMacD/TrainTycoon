@@ -46,13 +46,13 @@ function updateEditVideo () {
     echo '</select></label>';
     echo '<label>Name <input name="new-train-name" /></label>';
     echo '<label>First Station <select name="new-train-station1">';
-    foreach($database->getStations() as $station) {
-        echo '<option value="'.$station['id'].'">'.$station['Name'].'</option>';
+    foreach(Station::getStations() as $station) {
+        echo '<option value="'.$station->id.'">'.$station->getName().'</option>';
     }
     echo '</select></label>';
     echo '<label>Second Station <select name="new-train-station2">';
-    foreach($database->getStations() as $station) {
-        echo '<option value="'.$station['id'].'">'.$station['Name'].'</option>';
+    foreach(Station::getStations() as $station) {
+        echo '<option value="'.$station->id.'">'.$station->getName().'</option>';
     }
     echo '</select></label>';
     echo '<button>Create</button>';
@@ -68,8 +68,8 @@ function updateEditVideo () {
     }
     echo '</select></label>';
     echo '<label>New Station <select name="route-add-station">';
-    foreach($database->getStations() as $station) {
-        echo '<option value="'.$station['id'].'">'.$station['Name'].'</option>';
+    foreach(Station::getStations() as $station) {
+        echo '<option value="'.$station->id.'">'.$station->getName().'</option>';
     }
     echo '</select></label>';
     echo '<button>Add</button>';

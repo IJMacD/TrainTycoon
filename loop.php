@@ -8,6 +8,7 @@ require_once "debug.php";
 require_once "lang.php";
 require_once "classes/train.class.php";
 require_once "classes/building.class.php";
+require_once "classes/station.class.php";
 require_once "loop/state.train.php";
 require_once "loop/state.building.php";
 require_once "loop/state.town.php";
@@ -19,7 +20,6 @@ $g = new Game;
 $locos = $g->getLocos();
 $trains = $g->getTrains();
 $towns = $g->getTowns();
-$stations = $g->getStations();
 
 $video = isset($_GET['video']) ? $_GET['video'] : "default";
 
@@ -75,7 +75,7 @@ function updateInput(){
 
 			$type = $_POST['new-building-type'];
 			$town_id = $_POST['new-building-town'];
-			$name = $_POST['new-building-name'];
+			$name = strlen($_POST['new-building-name']) ? $_POST['new-building-name'] : null;
 
 			$database->insertBuilding($type, $town_id, $name);
 
@@ -84,15 +84,17 @@ function updateInput(){
 			$video = "edit";
 
 			$loco_id = $_POST['new-train-loco'];
-			$name = $_POST['new-train-name'];
+			$name = strlen($_POST['new-train-name']) ? $_POST['new-train-name'] : null;
 			$station1_id = $_POST['new-train-station1'];
 			$station2_id = $_POST['new-train-station2'];
 
 			$id = $database->insertTrain($loco_id, $name);
 
 			if ($id) {
-				$database->addRouteStop($id, 1, $station1_id);
-				$database->addRouteStop($id, 2, $station2_id);
+				$length = getStationDistance($station1_id, $station2_id);
+
+				$database->addRouteStop($id, 0, $station1_id);
+				$database->addRouteStop($id, 1, $station2_id, $length);
 
 				echo "<p>New train created pulled by {$CONST['locos'][$loco_id]['name']}</p>";
 			}
@@ -103,10 +105,14 @@ function updateInput(){
 			$station_id = $_POST['route-add-station'];
 			
 			$train = Train::getTrain($train_id);
+			$route = $train->getRoute();
+			$i = count($route);
 
-			$database->addRouteStop($train->id, count($train->getStations()) + 1, $station_id);
+			$length = getStationDistance($route[$i-1]['station_id'], $station_id);
 
-			echo "<p>Added new stop at {$g->getStations($station_id)['Name']} to train " . $train->getName()."</p>";
+			$database->addRouteStop($train->id, $i, $station_id, $length);
+
+			echo "<p>Added new stop at ".Station::getStation($station_id)->getName()." to train " . $train->getName()."</p>";
 		}
 	}
 	
@@ -257,4 +263,31 @@ function outputJSON()
 
 function m ($value) {
 	return sprintf("$%.02f", $value);
+}
+function getStationDistance ($s1_id, $s2_id) {
+	$s1 = Station::getStation($s1_id);
+	$s2 = Station::getStation($s2_id);
+
+	list ($lat1, $lon1) = $s1->getLatLon();
+	list ($lat2, $lon2) = $s2->getLatLon();
+	return dist($lat1,$lon1,$lat2,$lon2) / 1e5;
+}
+function dist ($lat1, $lon1, $lat2, $lon2) {
+    $R = 6371e3; // Mean Earth radius in metres
+    $φ1 = toRadians($lat1);
+    $φ2 = toRadians($lat2);
+    $Δφ = toRadians($lat2-$lat1);
+    $Δλ = toRadians($lon2-$lon1);
+
+    $a =   sin($Δφ/2) * sin($Δφ/2) +
+                cos($φ1) * cos($φ2) *
+                sin($Δλ/2) * sin($Δλ/2);
+
+    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+
+    return $R * $c;
+
+}
+function toRadians ($deg) {
+    return $deg * (pi()/180);
 }

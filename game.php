@@ -98,21 +98,6 @@ class Game
 		return $database->getTowns($tid);
 	}
 	
-	function getStations($sid=-1)
-	{
-		global $database;
-		$stations = $database->getStations();
-
-		if ($sid > 0) {
-			foreach ($stations as $station) {
-				if ($station['id'] == $sid) return $station;
-			}
-			return null;
-		}
-
-		return $stations;
-	}
-	
 	function getCommodities($town_id, $commodity="")
 	{
 		global $economy;

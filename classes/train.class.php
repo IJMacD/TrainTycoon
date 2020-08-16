@@ -67,6 +67,10 @@ class Train
 	{
 		return $this->direction;
 	}
+
+	function getRoute () {
+		return $this->route;
+	}
 	
 	function isAtStation()
 	{
@@ -113,11 +117,8 @@ class Train
 	
 	function getStations()
 	{
-		// Ideal
-		//return Station::getStation($this->route[$this->segment]);
-		return array_map(function ($v) { return $v['station_name']; }, $this->route);
-		// progress == 0, segment != 0
-		//$train['route'][$train['segment']-1]
+		$ids = array_map(function ($r) { return $r['station_id']; }, $this->route);
+		return Station::getStations($ids);
 	}
 	
 	/**
@@ -149,7 +150,8 @@ class Train
 	{
 		global $database;
 		if (!$this->isAtStation()) {
-			$this->progress = $this->progress + $this->direction * $this->speed * $delta;
+			$distance = $this->route[$this->segment]['length'];
+			$this->progress = $this->progress + $this->direction * $this->speed * $delta / $distance;
 			$database->updateTrain($this->id, 'progress', $this->progress);
 		}
 	}
@@ -276,7 +278,7 @@ class Train
 			$train->name = $t['Name'];
 			$train->loco_id = $t['loco_id'];
 			$train->progress = $t['progress'];
-			$train->segment = $t['segment'];
+			$train->segment = max($t['segment'], 1);
 			$train->direction = $t['direction'];
 			$train->speed = $t['speed'];
 			$train->route = $t['route'];

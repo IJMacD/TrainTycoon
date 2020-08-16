@@ -12,12 +12,12 @@ function updateTrainVideo () {
 		}
 		echo '</div>';
 		*/
-		$stations = $train->getStations();
+		$station_names = array_map(function ($s) { return $s->getName(); }, $train->getStations());
 		$i = $train->getNextIndex();
-		$stations[$i] = '<b>' . $stations[$i] . '</b>';
+		$station_names[$i] = '<b>' . $station_names[$i] . '</b>';
 		echo '<div class="train_list" id="train_'.$train->id.'">'
 			. '<b>' . $train->getName() . '</b> '
-			. '('.implode(", ", $stations).') '
+			. '('.implode(", ", $station_names).') '
 			. '<span class="direction-indicator">'.($train->getDirection() == 1 ? "UP" : "DOWN").'</span>'
 			. '<br>'
 			. '<img src="'.$CONST['locos'][$train->getLocoID()]['image'].'">';

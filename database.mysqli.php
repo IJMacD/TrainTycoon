@@ -7,6 +7,7 @@ class DB
 	private $connection;
 
 	private $commodities = [];
+	private $stations = null;
 	
     function __construct()
 	{
@@ -20,11 +21,8 @@ class DB
 		if ($params) {
 			$stmt = mysqli_prepare($this->connection, $q);
 			$types = implode("", array_map(function ($p) { return is_int($p) ? "i" : "s"; }, $params));
-			array_unshift($params, $types);
-			$ref = new ReflectionClass("mysqli_stmt");
-			$method = $ref->getMethod("bind_param");
-			$method->invokeArgs($stmt, $params);
-			$stmt->execute();
+			$stmt->bind_param($types, ...$params);
+			$result = $stmt->execute();
 		} else {
 			$result = mysqli_query($this->connection, $q);
 		}
@@ -81,7 +79,7 @@ class DB
 	{
 		if(!isset($this->trains)){
 			$this->trains = array();
-			$q = "SELECT * FROM `".TABLE_trains."`";
+			$q = "SELECT * FROM `".TABLE_trains."` ORDER BY CASE WHEN `Name` IS NULL THEN 1 ELSE 0 END, `Name`";
 			$result = $this->query($q);
 			if($result && $result->num_rows){
 				while($train = $result->fetch_assoc()){
@@ -102,7 +100,8 @@ class DB
 		$this->query($q, [$loco_id, $name]);
 		$id = mysqli_insert_id($this->connection);
 
-		$this->trains[] = ["id"=>$id,"Name"=>$name,"loco_id"=>$loco_id];
+		// Clear cache
+		unset($this->trains);
 
 		return $id;
 	}
@@ -141,16 +140,36 @@ class DB
 		return ($tid == -1 || $tid == "") ? $this->towns : $this->towns[$tid];
 	}
 	
-	function getStations(){
+	function getTown ($tid){
+		return $this->getTowns()[$tid];
+	}
+	
+	function getStations (){
 		if(!isset($this->stations)){
 			$this->stations = array();
-			$q = "SELECT * FROM `".TABLE_stations."` ORDER BY `Name`";
+			$q = "SELECT 
+					`stations`.`id`,
+					`stations`.`Name`,
+					`stations`.`town_id`,
+					COALESCE(`stations`.`lat`, `towns`.`lat`) AS lat,
+					COALESCE(`stations`.`lon`, `towns`.`lon`) AS lon
+				FROM stations
+					LEFT JOIN towns ON stations.town_id = towns.id
+				ORDER BY `stations`.`Name`";
 			$result = $this->query($q);
 			if($result && $result->num_rows){
-				while($row = $result->fetch_assoc()) {$this->stations[] = $row;}
+				while($row = $result->fetch_assoc()) {
+					$this->stations[$row['id']] = $row;
+				}
 			}
 		}
 		return $this->stations;
+	}
+	
+	function getStation ($id)
+	{
+		$this->getStations();
+		return $this->stations[$id];
 	}
 
 	function insertStation ($town_id, $name) {
@@ -218,16 +237,14 @@ class DB
 	}
 	
 	function updateTrain($id, $key, $value){
-		$v = $value === NULL ? "NULL" : "'$value'";
-		$q = "UPDATE `".TABLE_trains."` SET `$key` = $v WHERE `id` = '$id'";
-		$this->query($q);
+		$q = "UPDATE `".TABLE_trains."` SET `$key` = ? WHERE `id` = '$id'";
+		$this->query($q, [$value]);
 		$this->trains[$id][$key] = $value;
 	}
 	
 	function updateBuilding($id, $key, $value){
-		$v = $value === NULL ? "NULL" : "'$value'";
-		$q = "UPDATE `".TABLE_buildings."` SET `$key` = $v WHERE `id` = '$id'";
-		$this->query($q);
+		$q = "UPDATE `".TABLE_buildings."` SET `$key` = ? WHERE `id` = '$id'";
+		$this->query($q, [$value]);
 		$this->buildings[$id][$key] = $value;
 	}
 	
@@ -247,12 +264,13 @@ class DB
 	function getRoute ($route_id) {
 		$q = "SELECT
 			`station_id`,
-				`length`,
+				CASE WHEN `length` = 0 THEN 1 ELSE `length` END AS length,
+				`station_id`,
 				`stations`.`Name` AS station_name,
 				`town_id`,
 				`towns`.`Name` AS town_name,
-				`towns`.`lat` AS lat,
-				`towns`.`lon` AS lon,
+				COALESCE(`stations`.`lat`, `towns`.`lat`) AS lat,
+				COALESCE(`stations`.`lon`, `towns`.`lon`) AS lon,
 				population
 			FROM routes
 				JOIN stations ON routes.station_id = stations.id
@@ -263,9 +281,15 @@ class DB
 		return $this->query($q)->fetch_all(MYSQLI_ASSOC);
 	}
 
-	function addRouteStop ($route_id, $order, $station_id) {
-		$q = "INSERT INTO routes (`train_id`, `order`, `station_id`) VALUES ($route_id, $order, $station_id)";
+	function addRouteStop ($route_id, $order, $station_id, $length = 1) {
+		$q = "INSERT INTO routes (`train_id`, `order`, `station_id`, `length`) VALUES ($route_id, $order, $station_id, $length)";
 		$this->query($q);
+	}
+	
+	function updateRoute($train_id, $order, $key, $value){
+		$q = "UPDATE routes SET `$key` = ? WHERE `train_id` = ? AND `order` = ?";
+		$this->query($q, [$value, $train_id, $order]);
+		$this->trains[$train_id]['route'][$i] = $value;
 	}
 }
 $database = new DB;

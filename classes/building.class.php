@@ -20,7 +20,7 @@ class Building {
     function getTown () {
         global $database;
 
-        return $database->getTowns($this->town_id);
+        return $database->getTown($this->town_id);
     }
 
     function getName () {
