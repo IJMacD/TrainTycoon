@@ -1,11 +1,15 @@
 <?php
-require_once("constants.php");
-require_once("database.php");
-require_once("economy.php");
+
+require_once "constants.php";
+require_once "database.php";
+require_once "economy.php";
+require_once "util.php";
 
 class Game
 {
 	private $data = array();
+
+	private $database;
 
 	private $locos;
 	private $trains;
@@ -20,9 +24,11 @@ class Game
 
 	var $hasBreak = false;
 	
-	function init()
+	function __construct()
 	{
-		global $database, $debug, $MAX_DELTA;
+		global $debug;
+
+		$this->database = new DB(uniqid());
 		
 		$this->lasttime = $this->getData('lasttime');
 		$time = microtime(true);
@@ -46,56 +52,69 @@ class Game
 	}
 
 	function getData($key){
-		global $database;
-		return $database->getData($key);
+		return $this->database->getData($key);
 	}
 	
 	function setData($key, $value){
-		global $database;
-		$database->setData($key, $value);
+		$this->database->setData($key, $value);
 	}
 	
 	function State($state=-1)
 	{
-		global $database;
 		if($state!=-1)
-			$database->setData('gameState', $state);
-		return $database->getData('gameState');
+			$this->database->setData('gameState', $state);
+		return $this->database->getData('gameState');
 	}
 	
 	function Speed()
 	{
-		global $database, $CONST;
-		return $CONST['game_speeds'][$database->getData('gameState')];
+		global $CONST;
+		return $CONST['game_speeds'][$this->database->getData('gameState')];
 	}
 	
 	function getLocos()
 	{
-		global $database;
-		return $database->getLocos();
+		return $this->database->getLocos();
 	}
 	
-	function getTrains()
+	function getTrain ($id)
 	{
-		global $database;
-		$trains = array();
-		foreach($database->getTrains() as $train)
-		{
-			$trains[] = Train::getTrain($train['id']);
-		}
-		return $trains;
+		return $this->database->getTrain($id);
+	}
+	
+	function getTrains ()
+	{
+		return $this->database->getTrains();
 	}
 	
 	function getBuildings()
 	{
-		global $database;
-		return $database->getBuildings();
+		return $this->database->getBuildings();
 	}
 	
-	function getTowns($tid = -1)
+	function getStation ($id)
 	{
-		global $database;
-		return $database->getTowns($tid);
+		return $this->database->getStation($id);
+	}
+	
+	function getStations ()
+	{
+		return $this->database->getStations();
+	}
+	
+	function getBuildingTypes()
+	{
+		return $this->database->getBuildingTypes();
+	}
+	
+	function getTown ($tid)
+	{
+		return $this->database->getTowns($tid);
+	}
+	
+	function getTowns()
+	{
+		return $this->database->getTowns();
 	}
 	
 	function getCommodities($town_id, $commodity="")
@@ -104,15 +123,68 @@ class Game
 		return $economy->getCommodities($town_id, $commodity);
 	}
 	
+	function getCommodityTypes ()
+	{
+		return $this->database->getCommodityTypes();
+	}
+	
+	function getCommodityList ($commodity)
+	{
+		return $this->database->getCommodityList($commodity);
+	}
+
+	function getCommoditySupplyDemand ($town_id) 
+	{
+		return $this->database->getCommoditySupplyDemand($town_id);
+	}
+	
 	function updateTrain($id, $key, $value)
 	{
-		global $database;
-		return $database->updateTrain($id, $key, $value);
+		return $this->database->updateTrain($id, $key, $value);
 	}
 	
 	function updateCommodities($town_id, $commodity, $dsurplus)
 	{
 		global $economy;
 		return $economy->updateCommodities($town_id, $commodity, $dsurplus);
+	}
+
+	function reset () {
+		$this->database->reset();
+	}
+
+	function createStation ($town_id, $name) {
+		$this->database->insertStation($town_id, $name);
+	}
+
+	function createBuilding ($type, $town_id, $name) {
+		$this->database->insertBuilding($type, $town_id, $name);
+	}
+
+	function createTrain ($loco_id, $name, $station_ids) {
+		$id = $this->database->insertTrain($loco_id, $name);
+
+		if ($id) {
+			$length = getStationDistance($station_ids[0], $station_id[1]);
+
+			$this->database->addRouteStop($id, 0, $station_ids[0]);
+			$this->database->addRouteStop($id, 1, $station_ids[1], $length);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	function addRouteStop ($train_id, $station_id) {
+		$train = Train::getTrain($train_id);
+		$route = $train->getRoute();
+		$i = count($route);
+
+		$length = getStationDistance($route[$i-1]['station_id'], $station_id);
+
+		if ($length <=  0) return false;
+
+		$this->database->addRouteStop($train_id, $i, $station_id, $length);
 	}
 }

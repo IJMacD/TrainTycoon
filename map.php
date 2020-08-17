@@ -1,11 +1,12 @@
 <?php
 error_reporting(E_ALL);
 ini_set("display_errors", 1); 
-require_once("constants.php");
-require_once("database.php");
-require_once("game.php");
-require_once("lang.php");
-require_once("classes/train.class.php");
+
+require_once "constants.php";
+require_once "database.php";
+require_once "game.php";
+require_once "lang.php";
+require_once "classes/train.class.php";
 
 // define("IMG_FILE", './basemap.gif');
 // define("MAP_MIN_LON", -8.52);
@@ -61,14 +62,14 @@ if ($debug_level) {
     // echo 'Image Size: ' . $img_w . 'x' . $img_h . ' Scale: ' . $x_scale . 'x' . $y_scale;
 }
 
-$g = new Game;
-$trains = $g->getTrains();
+$g = new Game();
+$trains = Train::getTrains();
 $towns = $g->getTowns();
 
 // $towns = array(
-//     array("Name" => "thurso", "lon" => -3.5221, "lat" => 58.5936),
-//     array("Name" => "gloucester", "lon" => -2.2382, "lat" => 51.8642),
-//     array("Name" => "margate", "lon" => 1.3868, "lat" => 51.3896),
+//     array("name" => "thurso", "lon" => -3.5221, "lat" => 58.5936),
+//     array("name" => "gloucester", "lon" => -2.2382, "lat" => 51.8642),
+//     array("name" => "margate", "lon" => 1.3868, "lat" => 51.3896),
 // );
 
 function toCoords ($lon, $lat) {
@@ -98,8 +99,8 @@ foreach ($trains as $train) {
     $seg = $train->getSegment();
 
     for ($i = 1; $i < count($route_towns); $i++) {
-        $town_a = $g->getTowns($route_towns[$i - 1]);
-        $town_b = $g->getTowns($route_towns[$i]);
+        $town_a = $g->getTown($route_towns[$i - 1]);
+        $town_b = $g->getTown($route_towns[$i]);
 
         list($ax, $ay) = toCoords($town_a['lon'], $town_a['lat']);
         list($bx, $by) = toCoords($town_b['lon'], $town_b['lat']);
@@ -120,7 +121,7 @@ foreach ($towns as $town) {
     list($x, $y) = toCoords($town['lon'], $town['lat']);
 
     if ($debug_level) {
-        imagestring ($img, 4, 5, 15 * $line++, $town['Name'] . ' ('.$town['lon'].','.$town['lat'].') -> ('.$x.','.$y.')', $text_colour);
+        imagestring ($img, 4, 5, 15 * $line++, $town['name'] . ' ('.$town['lon'].','.$town['lat'].') -> ('.$x.','.$y.')', $text_colour);
     }
 
     if ($town['population'] > 1e6) {

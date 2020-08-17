@@ -1,7 +1,7 @@
 <?php
 
 function updateEditVideo () {
-    global $g, $database, $CONST;
+    global $g, $CONST;
 
     // New Station
     echo '<form class="edit-box">';
@@ -9,7 +9,7 @@ function updateEditVideo () {
     echo '<p><b>New Station</b></p>';
     echo '<label>Town <select name="new-station-town">';
     foreach($g->getTowns() as $town) {
-        echo '<option value="'.$town['id'].'">'.$town['Name'].'</option>';
+        echo '<option value="'.$town['id'].'">'.$town['name'].'</option>';
     }
     echo '</select></label>';
     echo '<label>Name <input name="new-station-name" /></label>';
@@ -22,11 +22,11 @@ function updateEditVideo () {
     echo '<p><b>New Building</b></p>';
     echo '<label>Town <select name="new-building-town">';
     foreach($g->getTowns() as $town) {
-        echo '<option value="'.$town['id'].'">'.$town['Name'].'</option>';
+        echo '<option value="'.$town['id'].'">'.$town['name'].'</option>';
     }
     echo '</select></label>';
     echo '<label>Building Type <select name="new-building-type">';
-    foreach($database->getBuildingTypes() as $type) {
+    foreach($g->getBuildingTypes() as $type) {
         $name = ucwords(str_replace("_", " ", $type));
         echo '<option value="'.$type.'">'.$name.'</option>';
     }

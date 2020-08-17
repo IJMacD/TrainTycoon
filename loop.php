@@ -16,10 +16,7 @@ require_once "loop/video.train.php";
 require_once "loop/video.economy.php";
 require_once "loop/video.edit.php";
 
-$g = new Game;
-$locos = $g->getLocos();
-$trains = $g->getTrains();
-$towns = $g->getTowns();
+$g = new Game();
 
 $video = isset($_GET['video']) ? $_GET['video'] : "default";
 
@@ -40,7 +37,7 @@ function loop(){
 
 // Read Paramaters from query string
 function updateInput(){
-	global $g, $database, $CONST, $video;
+	global $g, $CONST, $video;
 
 	if(isset($_GET['state'])){
 		if($_GET['state'] == "play") $g->State(STATE_NORM);
@@ -49,27 +46,24 @@ function updateInput(){
 	
 	if(isset($_GET['action'])) {
 		if ($_GET['action'] == "reset") {
-			$database->queryMultiple("DELETE FROM data; 
-				DELETE FROM availability;
-				UPDATE buildings SET scale = 1, wealth = 0;
-				UPDATE trains SET Car_1 = NULL, Car_2 = NULL, Car_3 = NULL, Car_4 = NULL, Car_5 = NULL, Car_6 = NULL, Car_7 = NULL, Car_8 = NULL;");
+			$g->reset();
 		} else if ($_GET['action'] === "new-station") {
 			$video = "edit";
 
 			$town_id = $_POST['new-station-town'];
 			$name = $_POST['new-station-name'];
 
-			$town = $database->getTowns($town_id);
+			$town = $g->getTown($town_id);
 			
 			if (!$name) {
 				$r = rand(0, count($CONST['station_suffixes']));
 				$suffix = $r === 0 ? "" : " " . $CONST['station_suffixes'][$r - 1];
-				$name = $town['Name'] . $suffix; 
+				$name = $town['name'] . $suffix; 
 			}
 
-			$database->insertStation($town_id, $name);
+			$g->createStation($town_id, $name);
 
-			echo "<p>New station created in {$town['Name']} called $name</p>";
+			echo "<p>New station created in {$town['name']} called $name</p>";
 		} else if ($_GET['action'] === "new-building") {
 			$video = "edit";
 
@@ -77,9 +71,9 @@ function updateInput(){
 			$town_id = $_POST['new-building-town'];
 			$name = strlen($_POST['new-building-name']) ? $_POST['new-building-name'] : null;
 
-			$database->insertBuilding($type, $town_id, $name);
+			$g->createBuilding($type, $town_id, $name);
 
-			echo "<p>New $type created in {$g->getTowns($town_id)['Name']}</p>";
+			echo "<p>New $type created in {$g->getTown($town_id)['name']}</p>";
 		} else if ($_GET['action'] === "new-train") {
 			$video = "edit";
 
@@ -88,15 +82,10 @@ function updateInput(){
 			$station1_id = $_POST['new-train-station1'];
 			$station2_id = $_POST['new-train-station2'];
 
-			$id = $database->insertTrain($loco_id, $name);
-
-			if ($id) {
-				$length = getStationDistance($station1_id, $station2_id);
-
-				$database->addRouteStop($id, 0, $station1_id);
-				$database->addRouteStop($id, 1, $station2_id, $length);
-
+			if ($g->createTrain($loco_id, $name, [$station1_id, $station2_id])) {
 				echo "<p>New train created pulled by {$CONST['locos'][$loco_id]['name']}</p>";
+			} else {
+				echo "<p>There was a problem creating the train</p>";
 			}
 		} else if ($_GET['action'] === "route-add") {
 			$video = "edit";
@@ -104,19 +93,17 @@ function updateInput(){
 			$train_id = $_POST['route-add-train'];
 			$station_id = $_POST['route-add-station'];
 			
-			$train = Train::getTrain($train_id);
-			$route = $train->getRoute();
-			$i = count($route);
+			if ($g->addRouteStop($train_id, $station_id)) {
 
-			$length = getStationDistance($route[$i-1]['station_id'], $station_id);
+				$train = Train::getTrain($train_id);
+				$station = Station::getStation($station_id);
 
-			$database->addRouteStop($train->id, $i, $station_id, $length);
-
-			echo "<p>Added new stop at ".Station::getStation($station_id)->getName()." to train " . $train->getName()."</p>";
+				echo "<p>Added new stop at " . $station->getName() . " to train " . $train->getName() . "</p>";
+			} else {
+				echo "<p>Unable to add new stop</p>";
+			}
 		}
 	}
-	
-	$g->init();
 }
 
 // Check state
@@ -147,7 +134,7 @@ function updatePhysics(){
 	global $g, $CONST;
 	if($g->State() != STATE_PAUSED){
 		$delta = $g->delta / SPEED_SCALE * $CONST['game_speeds'][$g->State()];
-		foreach($g->getTrains() as $train){
+		foreach(Train::getTrains() as $train){
 			if ($train->isLoading()) $train->waitLoading($g->dsimtime);
 			else if ($train->isRunning()) $train->move($delta);
 		}
@@ -199,7 +186,7 @@ function outputJSON()
 	
 	$result['trains'] = array();
 	
-	foreach($g->getTrains() as $_train)
+	foreach(Train::getTrains() as $_train)
 	{
 		/*
 		echo '<div class="town_list" style="float:right;">';
@@ -246,7 +233,7 @@ function outputJSON()
 		$town = array();
 		
 		$town['id'] = $_town['id'];
-		$town['name'] = $_town['Name'];
+		$town['name'] = $_town['name'];
 		
 		$town['commodities'] = array();
 		
@@ -259,35 +246,4 @@ function outputJSON()
 	}
 	
 	echo json_encode($result);
-}
-
-function m ($value) {
-	return sprintf("$%.02f", $value);
-}
-function getStationDistance ($s1_id, $s2_id) {
-	$s1 = Station::getStation($s1_id);
-	$s2 = Station::getStation($s2_id);
-
-	list ($lat1, $lon1) = $s1->getLatLon();
-	list ($lat2, $lon2) = $s2->getLatLon();
-	return dist($lat1,$lon1,$lat2,$lon2) / 1e5;
-}
-function dist ($lat1, $lon1, $lat2, $lon2) {
-    $R = 6371e3; // Mean Earth radius in metres
-    $φ1 = toRadians($lat1);
-    $φ2 = toRadians($lat2);
-    $Δφ = toRadians($lat2-$lat1);
-    $Δλ = toRadians($lon2-$lon1);
-
-    $a =   sin($Δφ/2) * sin($Δφ/2) +
-                cos($φ1) * cos($φ2) *
-                sin($Δλ/2) * sin($Δλ/2);
-
-    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
-
-    return $R * $c;
-
-}
-function toRadians ($deg) {
-    return $deg * (pi()/180);
 }

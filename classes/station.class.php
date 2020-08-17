@@ -1,6 +1,6 @@
 <?php
 
-require_once "database.php";
+require_once "game.php";
 
 class Station
 {
@@ -23,9 +23,9 @@ class Station
 	
 	function getTown()
 	{
-		global $database;
+		global $g;
 
-		return $database->getTown($this->town_id);
+		return $g->getTown($this->town_id);
 	}
 
 	function getLat () {
@@ -42,13 +42,13 @@ class Station
 	
 	static function getStation ($id)
 	{
-		global $database;
+		global $g;
 
 		if(!isset(self::$_singleton[$id]))
 		{
 			self::$_singleton[$id] = new self($id);
 
-			$station = $database->getStation($id);
+			$station = $g->getStation($id);
 
 			self::$_singleton[$id]->name = $station['name'];
 			self::$_singleton[$id]->town_id = $station['town_id'];
@@ -62,8 +62,8 @@ class Station
 	static function getStations ($ids=null)
 	{
 		if (!$ids) {
-			global $database;
-			$ids = array_map(function ($s) { return $s['id']; }, $database->getStations());
+			global $g;
+			$ids = array_map(function ($s) { return $s['id']; }, $g->getStations());
 		}
 
 		return array_map(function ($id) { return self::getStation($id); }, $ids);

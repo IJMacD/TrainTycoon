@@ -5,15 +5,17 @@ require_once("debug.php");
 class DB
 {
 	private $connection;
+	private $prefix = "";
 
 	private $commodities = [];
 	private $stations = null;
 	
-    function __construct()
+    function __construct($prefix = "")
 	{
 		global $CONST;
 		$this->connection = mysqli_connect(DB_HOST, DB_USER, DB_PASS) or $this->redirect("Server Error<br>Cannot connect to database server");
 		mysqli_select_db($this->connection, DB_NAME) or $this->redirect("Server Error<br>Cannot select database");
+		$this->prefix = $prefix;
     }
 
 	function query($q, $params=null){
@@ -75,11 +77,17 @@ class DB
 		return $this->locos;
 	}
 	
-	function getTrains($tid=-1)
+	function getTrain ($id)
+	{
+		$trains = $this->getTrains();
+		return isset($trains[$id]) ? $trains[$id] : false;
+	}
+	
+	function getTrains()
 	{
 		if(!isset($this->trains)){
 			$this->trains = array();
-			$q = "SELECT * FROM `".TABLE_trains."` ORDER BY CASE WHEN `Name` IS NULL THEN 1 ELSE 0 END, `Name`";
+			$q = "SELECT * FROM `".TABLE_trains."` ORDER BY CASE WHEN `name` IS NULL THEN 1 ELSE 0 END, `name`";
 			$result = $this->query($q);
 			if($result && $result->num_rows){
 				while($train = $result->fetch_assoc()){
@@ -88,15 +96,12 @@ class DB
 				}
 			}
 		}
-		if($tid >= 0)
-		{
-			return isset($this->trains[$tid]) ? $this->trains[$tid] : false;
-		}
-		else return $this->trains;
+		
+		return $this->trains;
 	}
 
 	function insertTrain ($loco_id, $name) {
-		$q = "INSERT INTO trains (loco_id, Name) VALUES (?, ?)";
+		$q = "INSERT INTO trains (loco_id, name) VALUES (?, ?)";
 		$this->query($q, [$loco_id, $name]);
 		$id = mysqli_insert_id($this->connection);
 
@@ -131,7 +136,7 @@ class DB
 	function getTowns($tid = -1){
 		if(!isset($this->towns)){
 			$this->towns = array();
-			$q = "SELECT * FROM `".TABLE_towns."` ORDER BY `Name`";
+			$q = "SELECT * FROM `".TABLE_towns."` ORDER BY `name`";
 			$result = $this->query($q);
 			if($result && $result->num_rows){
 				while($row = $result->fetch_assoc()){$this->towns[$row['id']] = $row;}
@@ -270,7 +275,7 @@ class DB
 				`station_id`,
 				`buildings`.`name` AS station_name,
 				`town_id`,
-				`towns`.`Name` AS town_name,
+				`towns`.`name` AS town_name,
 				COALESCE(`buildings`.`lat`, `towns`.`lat`) AS lat,
 				COALESCE(`buildings`.`lon`, `towns`.`lon`) AS lon,
 				population

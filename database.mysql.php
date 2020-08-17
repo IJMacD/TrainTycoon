@@ -7,8 +7,8 @@ class DB
     function DB()
 	{
 		global $CONST;
-		$this->connection = mysql_connect(DB_HOST, DB_USER, DB_PASS) or $this->redirect("Server Error<br>Cannot connect to database server");
-		mysql_select_db(DB_NAME, $this->connection) or $this->redirect("Server Error<br>Cannot select database");
+		$this->connection = mysql_connect(DB_HOST, DB_USER, DB_PASS) or die("Server Error<br>Cannot connect to database server");
+		mysql_select_db(DB_NAME, $this->connection) or die("Server Error<br>Cannot select database");
     }
 	
 	function log($message, $level=1)
@@ -65,7 +65,14 @@ class DB
 		return $this->locos;
 	}
 	
-	function getTrains($tid=-1)
+	function getTrain ($id)
+	{
+		$trains = $this->getTrains();
+		
+		return isset($trains[$id]) ? $trains[$id] : null;
+	}
+	
+	function getTrains ()
 	{
 		if(!isset($this->trains)){
 			$this->trains = array();
@@ -79,7 +86,7 @@ class DB
 					if($result_2 && mysql_num_rows($result_2)){
 						while($stop = mysql_fetch_assoc($result_2)){
 							$train['route_ids'][] = $stop['id'];
-							$train['route'][] = $stop['Name'];
+							$train['route'][] = $stop['name'];
 							$train['town_ids'][] = $stop['town_id'];
 						}
 					}
@@ -87,11 +94,8 @@ class DB
 				}
 			}
 		}
-		if($tid >= 0)
-		{
-			return isset($this->trains[$tid]) ? $this->trains[$tid] : false;
-		}
-		else return $this->trains;
+		
+		return $this->trains;
 	}
 	
 	function getBuildings(){
@@ -264,6 +268,11 @@ class DB
 		$q = "INSERT INTO `".TABLE_locos."` (`id`, `active`) VALUES ".implode(", ", $values);
 		$this->query($q);
 	}
+
+	function reset () {
+		$this->queryMultiple("DELETE FROM data; 
+			DELETE FROM availability;
+			UPDATE buildings SET scale = 1, wealth = 0;
+			UPDATE trains SET Car_1 = NULL, Car_2 = NULL, Car_3 = NULL, Car_4 = NULL, Car_5 = NULL, Car_6 = NULL, Car_7 = NULL, Car_8 = NULL;");
+	}
 }
-$database = new DB;
-?>

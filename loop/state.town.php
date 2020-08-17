@@ -12,7 +12,7 @@ function updateTownState () {
 			$c = $g->getCommodities($town['id'], $rate['commodity']);
 			$delta = $rate['supplies'] > 0 ? $rate['supplies'] : -$rate['demands'];
 			$quantity = $g->dsimtime * $delta * $kpop;
-			$debug->log("Trying to consume/produce $quantity of {$rate['commodity']} at {$town['Name']}", 3);
+			$debug->log("Trying to consume/produce $quantity of {$rate['commodity']} at {$town['name']}", 3);
 
 			if(-$quantity <= $c['surplus']) {
 				$g->updateCommodities($town['id'], $rate['commodity'], $quantity);

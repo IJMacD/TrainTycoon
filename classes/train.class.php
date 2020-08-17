@@ -1,4 +1,5 @@
 <?php
+
 class Train
 {
 	var $id;
@@ -37,7 +38,7 @@ class Train
 	/**
 	 * Methods
 	 */
-	private function __construct($id){ $this->id = $id; }
+	private function __construct ($id) { $this->id = $id; }
 	
 	public function getName()
 	{
@@ -137,7 +138,7 @@ class Train
 		return $this->route[($this->segment+1)%count($this->route)]['town_id'];
 	}
 
-	function getTowns()
+	function getTowns ()
 	{
 		return array_map(function ($v) { return $v['town_id']; }, $this->route);
 	}
@@ -148,17 +149,17 @@ class Train
 	 */
 	function move($delta)
 	{
-		global $database;
+		global $g;
 		if (!$this->isAtStation()) {
 			$distance = $this->route[$this->segment]['length'];
 			$this->progress = $this->progress + $this->direction * $this->speed * $delta / $distance;
-			$database->updateTrain($this->id, 'progress', $this->progress);
+			$g->updateTrain($this->id, 'progress', $this->progress);
 		}
 	}
 	
 	function moveToNextStation()
 	{
-		global $database;
+		global $g;
 
 		/*
 		 *     Station:    A          B           C
@@ -177,7 +178,7 @@ class Train
 				$this->segment = ($this->segment - 1) % count($this->route);
 			}
 		} else {
-			global $database;
+			global $g;
 			if ($this->segment + 1 >= count($this->route)) {
 				$this->direction = -1;
 				$this->progress = 100;
@@ -192,12 +193,12 @@ class Train
 
 		// exit;
 
-		$database->updateTrain($this->id, 'progress', $this->progress);
-		$database->updateTrain($this->id, 'segment', $this->segment); 
-		$database->updateTrain($this->id, 'direction', $this->direction); 
+		$g->updateTrain($this->id, 'progress', $this->progress);
+		$g->updateTrain($this->id, 'segment', $this->segment); 
+		$g->updateTrain($this->id, 'direction', $this->direction); 
 
 		$this->loading_timeout = 0;
-		$database->updateTrain($this->id, "loading_timeout", $this->loading_timeout);
+		$g->updateTrain($this->id, "loading_timeout", $this->loading_timeout);
 
 		$this->state = "RUNNING";
 	}
@@ -207,14 +208,14 @@ class Train
 	 */
 	function load($commodity)
 	{
-		global $database;
+		global $g;
 		
 		if(count($this->cars) >= 8)
 			return false;
 			
 		$this->cars[] = $commodity;
 		$i = count($this->cars);
-		$database->updateTrain($this->id, 'Car_'.$i, $commodity);
+		$g->updateTrain($this->id, 'Car_'.$i, $commodity);
 
 		return true;
 	}
@@ -224,7 +225,7 @@ class Train
 	 */
 	function unload()
 	{
-		global $database, $CONST;
+		global $g, $CONST;
 
 		$out = array();
 		
@@ -235,38 +236,35 @@ class Train
 
 		$this->cars = array();
 		for($i = 1; $i <= 8; $i++)
-			$database->updateTrain($this->id, 'Car_'.$i, NULL);
+			$g->updateTrain($this->id, 'Car_'.$i, NULL);
 
 		$this->loading_timeout = $CONST['TRAIN_LOADING_TIME'];
-		$database->updateTrain($this->id, "loading_timeout", $this->loading_timeout);
+		$g->updateTrain($this->id, "loading_timeout", $this->loading_timeout);
 
 		// Snap to end
 		$this->progress = $this->direction > 0 ? 100 : 0;
-		$database->updateTrain($this->id, "progress", $this->progress);
+		$g->updateTrain($this->id, "progress", $this->progress);
 
 		return $out;
 	}
 
 	function waitLoading ($dtime) {
-		global $database;
+		global $g;
 		$this->loading_timeout -= $dtime;
-		$database->updateTrain($this->id, "loading_timeout", $this->loading_timeout);
+		$g->updateTrain($this->id, "loading_timeout", $this->loading_timeout);
 	}
 	
 	/**
 	 * Static
 	 */
-	static function getTrain($id)
+	static function getTrain ($id)
 	{
-		global $database, $g, $debug;
+		global $g, $debug;
 		
-		if(!is_array(Train::$_singleton))
-			Train::$_singleton = array();
-		
-		if(!isset(Train::$_singleton[$id]))
+		if(!isset(self::$_singleton[$id]))
 		{
-			$train = new Train($id);
-			$t = $database->getTrains($id);
+			$train = new self($id);
+			$t = $g->getTrain($id);
 			
 			if(!is_array($t))
 			{
@@ -275,7 +273,7 @@ class Train
 				return false;
 			}
 			
-			$train->name = $t['Name'];
+			$train->name = $t['name'];
 			$train->loco_id = $t['loco_id'];
 			$train->progress = $t['progress'];
 			$train->segment = max($t['segment'], 1);
@@ -316,20 +314,14 @@ class Train
 					$train->cars[] = $t['Car_'.$i];
 			}
 			
-			Train::$_singleton[$id] = $train;
+			self::$_singleton[$id] = $train;
 		}
 		
-		return Train::$_singleton[$id];
+		return self::$_singleton[$id];
 	}
 
 	static function getTrains () {
-		global $database;
-
-		$out = [];
-		foreach ($database->getTrains() as $train) {
-			$out[] = self::getTrain($train['id']);
-		}
-
-		return $out;
+		global $g;
+		return array_map(function ($t) { return self::getTrain($t['id']); }, $g->getTrains());
 	}
 }

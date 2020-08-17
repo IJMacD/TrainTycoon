@@ -4,7 +4,7 @@ function updateTrainVideo () {
     global $g, $lang, $debug, $CONST;
     
     echo '<h1>'.$lang['en']['trains'].'</h1>';
-	foreach($g->getTrains() as $train){
+	foreach(Train::getTrains() as $train){
 		/*
 		echo '<div class="town_list" style="float:right;">';
 		for($i = 0; $i < count($train['route']); $i++){

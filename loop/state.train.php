@@ -4,7 +4,7 @@ function updateTrainState () {
     global $g, $debug;
     
 	//updateTrains()
-	foreach($g->getTrains() as $train){
+	foreach(Train::getTrains() as $train){
 		// Stopped Trains
 		//if($train['speed'] == 0)
 		//	$g->updateTrain($train['id'], 'speed', $CONST['locos'][$train['loco_id']]['topspeed']);
@@ -14,7 +14,7 @@ function updateTrainState () {
 		{
 			$town_id = $train->getTown();
 
-			$debug->log("{$train->getName()} arrived at " . $g->getTowns($town_id)['Name']);
+			$debug->log("{$train->getName()} arrived at " . $g->getTown($town_id)['name']);
 
 			//unload
 			$unloaded_cars = $train->unload();
@@ -36,7 +36,7 @@ function updateTrainState () {
 			
 			//load
 			$next_town = $train->getTown();
-			$debug->log("{$train->getName()} @ " . $g->getTowns($town_id)['Name'] . ' loading for ' . $g->getTowns($next_town)['Name']);
+			$debug->log("{$train->getName()} @ " . $g->getTown($town_id)['name'] . ' loading for ' . $g->getTown($next_town)['name']);
 			$full = false;
 			while (!$full) {
 				$commodities = $g->getCommodities($town_id);

@@ -96,7 +96,7 @@ function updateState(){
 	//updateBuildings()
 	if($g->State() != STATE_PAUSED){
 	foreach($g->getBuildings() as $building){
-		$town = $g->getTowns($building['town_id']);
+		$town = $g->getTown($building['town_id']);
 		foreach($CONST['buildings'][$building['type']] as $commodity => $rate){
 			$g->updateCommodities($building['town_id'], $commodity, ($g->dsimtime * $rate));
 		}
@@ -130,7 +130,7 @@ function updateVideo(){
 	echo "Date: ".date("Y-m-d", $g->getData('simstamp'));
 	echo '<h1>'.$lang['en']['trains'].'</h1>';
 	foreach($g->getTrains() as $train){
-		$name = ($train['Name'] != "") ? $train['Name'] : "Train ".$train['id'];
+		$name = ($train['name'] != "") ? $train['name'] : "Train ".$train['id'];
 		echo '<div class="town_list" style="float:right;">';
 		for($i = 0; $i < count($train['route']); $i++){
 			echo $train['town_ids'][$i]." ".$train['route'][$i]."<br>";
@@ -149,7 +149,7 @@ function updateVideo(){
 		echo '</div>';
 	}
 	foreach($g->getTowns() as $town){
-		echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['Name'].'<b><br>';
+		echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['name'].'<b><br>';
 		echo '<table><tr><th>Name</th><th>Surplus</th><th>Price</th></tr>';
 		foreach($g->getCommodities($town['id']) as $commodity){
 			echo '<tr><td>'.$commodity['name'].'</td><td>'.$commodity['surplus'].'</td><td>$'.sprintf('%.2f', $commodity['price']).'</td></tr>';

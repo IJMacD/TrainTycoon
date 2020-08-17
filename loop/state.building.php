@@ -33,7 +33,7 @@ function updateBuildingState () {
 				
 				if($rate['demands'] > 0 && $c['surplus'] < $q_demand) {
 					$has_all_consumables = false;
-					$debug->log("Not enough {$rate['commodity']} available for ". $building->getName() . " in " . $town['Name'], 2);
+					$debug->log("Not enough {$rate['commodity']} available for ". $building->getName() . " in " . $town['name'], 2);
 					// $debug->log(print_r(array_map(function ($r) use ($g) { return $r['demands'] > 0 ? "Needs {$r['demands']} x {$r['commodity']} Available: {$g->getCommodities($town['id'], $rate['commodity'])['surplus']}" : "Supplies {$r['commodity']}"; }, $rates),true),3);
 
 					// Adjust scale down
@@ -60,7 +60,7 @@ function updateBuildingState () {
 				$building->setScale((1-$t) * $building->getScale() + $t * $target);
 			}
 			else if ($profit <= 0) {
-				$debug->log($building->getName() . " in " . $town['Name'] ." not operating because there's no profit in it.");
+				$debug->log($building->getName() . " in " . $town['name'] ." not operating because there's no profit in it.");
 				$debug->log("Cost $total_cost Revenue $total_revenue Profit $profit", 2);
 
 				// Adjusting scale down
