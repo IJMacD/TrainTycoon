@@ -1,14 +1,14 @@
 <?php
 
 function updateTownState () {
-    global $g, $debug, $database;
+    global $g, $debug;
     
 	// update population based consumption
 	foreach ($g->getTowns() as $town) {
 		$pop = $town['population'];
 		$kpop = $pop / 1e6;
 		
-		foreach ($database->getProduction('population') as $rate) {
+		foreach ($g->getProduction('population') as $rate) {
 			$c = $g->getCommodities($town['id'], $rate['commodity']);
 			$delta = $rate['supplies'] > 0 ? $rate['supplies'] : -$rate['demands'];
 			$quantity = $g->dsimtime * $delta * $kpop;

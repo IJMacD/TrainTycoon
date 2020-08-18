@@ -1,6 +1,6 @@
 <?php
 
-require_once "database.php";
+require_once "game.php";
 
 class Building {
     var $id;
@@ -12,15 +12,15 @@ class Building {
     private $scale;
 
     function getProductionRates () {
-        global $database;
+        global $g;
 
-        return $database->getProduction($this->type);
+        return $g->getProduction($this->type);
     }
 
     function getTown () {
-        global $database;
+        global $g;
 
-        return $database->getTown($this->town_id);
+        return $g->getTown($this->town_id);
     }
 
     function getName () {
@@ -37,11 +37,11 @@ class Building {
     }
 
     function addWealth ($value) {
-        global $database;
+        global $g;
 
         $this->wealth += $value;
 
-        $database->updateBuilding($this->id, "wealth", $this->wealth);
+        $g->updateBuilding($this->id, "wealth", $this->wealth);
     }
 
     function getScale () {
@@ -49,18 +49,18 @@ class Building {
     }
 
     function setScale ($scale) {
-        global $database;
+        global $g;
 
         $this->scale = $scale;
 
-        $database->updateBuilding($this->id, "scale", $this->scale);
+        $g->updateBuilding($this->id, "scale", $this->scale);
     }
 
 
     static function getBuildings () {
-        global $database;
+        global $g;
 
-        $db_list = $database->getBuildings();
+        $db_list = $g->getBuildings();
         $out_list = [];
 
         foreach ($db_list as $b) {

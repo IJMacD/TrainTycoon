@@ -2,33 +2,25 @@
 
 require_once "constants.php";
 require_once "database.php";
-require_once "economy.php";
 require_once "util.php";
+
+session_start();
 
 class Game
 {
-	private $data = array();
-
 	private $database;
-
-	private $locos;
-	private $trains;
-	private $buildings;
-	private $towns;
-	private $stations;
-	private $commodities;
 	
 	var $lasttime;
 	var $delta;
 	var $dsimtime;
-
-	var $hasBreak = false;
 	
-	function __construct()
+	function __construct ()
 	{
 		global $debug;
 
-		$this->database = new DB(uniqid());
+		$game_id = isset($_SESSION['game_id']) ? $_SESSION['game_id'] : null;
+
+		$this->database = new DB($game_id);
 		
 		$this->lasttime = $this->getData('lasttime');
 		$time = microtime(true);
@@ -49,6 +41,16 @@ class Game
 		$this->setData('lasttime', $time);
 		$this->dsimtime = $this->delta / TIME_SCALE * $this->Speed();
 		$debug->log("Delta (Sim): " . $this->dsimtime, 2);
+	}
+
+	function newGame () {
+		$game_id = uniqid();
+
+		$_SESSION['game_id'] = $game_id;
+
+		$this->database = new DB($game_id);
+
+		$this->database->create();
 	}
 
 	function getData($key){
@@ -117,10 +119,39 @@ class Game
 		return $this->database->getTowns();
 	}
 	
-	function getCommodities($town_id, $commodity="")
+	function getCommodities ($town_id, $commodity="")
 	{
-		global $economy;
-		return $economy->getCommodities($town_id, $commodity);
+		$commodities = $this->database->getCommodities($town_id);
+
+		/*
+		 * getCommodities()
+		 * Array<{
+		 * 	name
+		 * 	supply
+		 * 	surplus
+		 * 	demand
+		 * 	price
+		 * }>
+		 */
+		$commodities = array_map(function ($c) {
+			return [
+				"name" => $c['type'],
+				"supply" => $c['available'],
+				"surplus" => $c['available'],
+				"demand" => 0,
+				"price" => $c['price'],
+			];
+		}, $commodities);
+
+		if ($commodity) {
+			foreach ($commodities as $c) {
+				if ($c['name'] == $commodity) return $c;
+			} 
+			$debug->log("Can't find commodity $commodity at town $town_id");
+			return null;
+		}
+
+		return $commodities;
 	}
 	
 	function getCommodityTypes ()
@@ -137,16 +168,28 @@ class Game
 	{
 		return $this->database->getCommoditySupplyDemand($town_id);
 	}
+
+	function getProduction ($type) 
+	{
+		return $this->database->getProduction($type);
+	}
 	
 	function updateTrain($id, $key, $value)
 	{
 		return $this->database->updateTrain($id, $key, $value);
 	}
+
+	function updateBuilding($id, $key, $value){
+		return $this->database->updateBuilding($id, $key, $value);
+	}
 	
 	function updateCommodities($town_id, $commodity, $dsurplus)
 	{
-		global $economy;
-		return $economy->updateCommodities($town_id, $commodity, $dsurplus);
+		$c = $this->getCommodities($town_id, $commodity);
+		
+		$this->database->setCommodity($town_id, $commodity, $c['surplus'] + $dsurplus);
+
+		return $dsurplus * $c['price'];
 	}
 
 	function reset () {
@@ -165,7 +208,7 @@ class Game
 		$id = $this->database->insertTrain($loco_id, $name);
 
 		if ($id) {
-			$length = getStationDistance($station_ids[0], $station_id[1]);
+			$length = getStationDistance($station_ids[0], $station_ids[1]);
 
 			$this->database->addRouteStop($id, 0, $station_ids[0]);
 			$this->database->addRouteStop($id, 1, $station_ids[1], $length);
@@ -183,8 +226,10 @@ class Game
 
 		$length = getStationDistance($route[$i-1]['station_id'], $station_id);
 
-		if ($length <=  0) return false;
+		if ($length <= 0) return false;
 
 		$this->database->addRouteStop($train_id, $i, $station_id, $length);
+
+		return true;
 	}
 }

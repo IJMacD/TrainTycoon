@@ -17,14 +17,6 @@ define("DB_USER", "railtycoon");
 define("DB_PASS", "6iJ27aJA4AQ5");
 define("DB_NAME", "train_tycoon");
 
-define("TABLE_data", "data");
-define("TABLE_locos", "locos");
-define("TABLE_trains", "trains");
-define("TABLE_buildings", "buildings");
-define("TABLE_towns", "towns");
-define("TABLE_stations", "stations");
-define("TABLE_commodities", "commodities");
-
 $CONST = array();
 
 $CONST['locos'] = array(

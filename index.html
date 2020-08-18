@@ -1,9 +1,10 @@
 <link rel="stylesheet" href="style.css" />
 <script type="text/javascript" src="jquery.js"></script>
 
-<input type="button" onclick="$('#trains').load('loop.php?state=play')" value="Play" />
-<input type="button" onclick="$('#trains').load('loop.php?state=pause')" value="Pause" />
+<input type="button" onclick="$('#trains').load('loop.php?action=play-game')" value="Play" />
+<input type="button" onclick="$('#trains').load('loop.php?action=pause-game')" value="Pause" />
 <input type="button" onclick="$('#trains').load('loop.php?action=reset')" value="Reset" />
+<input type="button" onclick="$('#trains').load('loop.php?action=new-game')" value="New Game" />
 <input type="button" id="looping-btn" value="Start Loop"/>
 <input type="button" onclick="run();" value="Step"/>
 <label for="debug1">Debug</label>

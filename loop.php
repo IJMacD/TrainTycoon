@@ -38,16 +38,13 @@ function loop(){
 // Read Paramaters from query string
 function updateInput(){
 	global $g, $CONST, $video;
-
-	if(isset($_GET['state'])){
-		if($_GET['state'] == "play") $g->State(STATE_NORM);
-		else if($_GET['state'] == "pause") $g->State(STATE_PAUSED);
-	}
 	
 	if(isset($_GET['action'])) {
-		if ($_GET['action'] == "reset") {
-			$g->reset();
-		} else if ($_GET['action'] === "new-station") {
+		if ($_GET['action'] == "new-game") $g->newGame();
+		else if ($_GET['action'] == "play-game") $g->State(STATE_NORM);
+		else if ($_GET['action'] == "pause-game") $g->State(STATE_PAUSED);
+		else if ($_GET['action'] == "reset") $g->reset();
+		else if ($_GET['action'] === "new-station") {
 			$video = "edit";
 
 			$town_id = $_POST['new-station-town'];
@@ -167,10 +164,6 @@ function updateVideo(){
 
 	updateEconomyVideo();
 
-	if ($g->hasBreak)
-	{
-		echo '<script>stopLoop();</script>';
-	}
 }
 function outputJSON()
 {
