@@ -189,7 +189,11 @@ class Game
 		$this->database->insertStation($town_id, $name);
 	}
 
-	function createBuilding ($type, $town_id, $name) {
+	function createBuilding ($type, $town_id, $name = "") {
+		if (!$name) {
+			$town = $this->getTown($town_id);
+			$name = $town['name'] . " " . ucfirst($type);
+		}
 		$this->database->insertBuilding($type, $town_id, $name);
 	}
 
@@ -233,6 +237,25 @@ class Game
 	static function newGame () {
 		$tmp_database = new DB();
 
-		return $tmp_database->createGame(uniqid());
+		$game_id = $tmp_database->createGame(uniqid());
+
+		$game = new self($game_id);
+
+		// Seed economy
+		$buildingTypes = $game->getBuildingTypes();
+		$towns = $game->getTowns();
+
+		for ($i = 0; $i < 100; $i++) {
+			$building_rand = rand(0, count($buildingTypes)-1);
+			$town_rand_id = array_rand($towns);
+
+			$buildingType = $buildingTypes[$building_rand];
+
+			if ($buildingType !== "station") {
+				$game->createBuilding($buildingType, $town_rand_id);
+			}
+		}
+
+		return $game_id;
 	}
 }

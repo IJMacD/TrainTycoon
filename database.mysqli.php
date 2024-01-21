@@ -31,7 +31,7 @@ class DB
 			$stmt->bind_param($types, ...$params);
 			$result = $stmt->execute();
 			if (!$result)  {
-				die(mysqli_error($stmt));
+				die(mysqli_error($this->connection));
 			}
 			$result = $stmt->get_result();
 		} else {
@@ -61,7 +61,9 @@ class DB
 	function createGame ($session_id) {
 		$this->query("INSERT INTO {$this->prefix}games (`session_id`) VALUES (?)", [$session_id]);
 
-		return $this->connection->insert_id;
+		$this->game_id = $this->connection->insert_id;
+
+		return $this->game_id;
 	}
 
 	function getData($key){
@@ -439,9 +441,9 @@ function economySQL ($prefix, $game_id, $mode, $id) {
 	";
 
 	if ($mode === "town" || $mode === "supply_demand") {
-		$sql .= "AND b.id = $id GROUP BY a.`type`";
+		$sql .= "AND b.id = $id GROUP BY a.`type` ORDER BY b.id";
 	} else if ($mode === "commodity") {
-		$sql .= "AND a.type = '$id' GROUP BY b.id ORDER BY price DESC";
+		$sql .= "AND a.type = '$id' GROUP BY b.id ORDER BY price DESC, b.id";
 	}
 
 	return $sql;

@@ -23,7 +23,7 @@ $CONST = array();
 $CONST['locos'] = array(
 	1 => array("name" => "Flying Scotsman", "number" => "4472", "configuration" => "4-6-2", "topspeed" => 100, "reliability" => 0.95, "price" => 1000, "start_year" => 1923, "image" => "images/10194-1.gif"),
 	2 => array("name" => "Mallard", "number" => "4468", "configuration" => "4-6-2", "topspeed" => 100, "reliability" => 0.85, "price" => 800, "start_year" => 1938, "image" => "images/kt203.gif")
-	);
+);
 $CONST['commodities'] = array(
 	"alcohol" => array("price" => 5, "car_image" => "images/4537.gif"),
 	"clothing" => array("price" => 3, "car_image" => "images/4564c.gif"),
@@ -40,8 +40,8 @@ $CONST['commodities'] = array(
 	"mail" => array("price" => 1, "car_image" => "images/4758b.gif"),
 	"livestock" => array("price" => 1, "car_image" => "images/60052c.gif"),
 	"meat" => array("price" => 1, "car_image" => "images/4563d.gif"),
-	);
-$CONST['station_suffixes'] = array("Central", "Crossing", "Gate", "Junction", "Picadilly", "Priory", "East", "West", "North", "South", "Gap", "New Street", "High Street", "Halt");
+);
+$CONST['station_suffixes'] = array("Central", "Crossing", "Gate", "Junction", "East", "West", "North", "South", "New Street", "Halt", "Parkway", "Main Line", "Town", "Riverside", "Victoria", "International", "Interchange", "Cross", "Market");
 
 $CONST['game_speeds'][STATE_PAUSED] = 0;
 $CONST['game_speeds'][STATE_VSLOW] = 0.2;
