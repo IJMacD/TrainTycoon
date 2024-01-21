@@ -354,15 +354,24 @@ class DB
 		$this->query($q, [$this->game_id, $message]);
 	}
 
-	function getLog(){
+	function getLog($limit = 10, $before = ""){
 		if (!isset($this->game_id)) die ("Game ID not set");
 
-		$q = "SELECT `message`, `date` FROM {$this->prefix}log WHERE `game_id` = ? ORDER BY `date` DESC";
+		$params = [$this->game_id, $limit];
 
-		$result = $this->query($q, [$this->game_id]);
+		$whereBefore = "";
+
+		if ($before) {
+			$whereBefore = "AND `date` < ?";
+			$params = [$this->game_id, $before, $limit];
+		}
+
+		$q = "SELECT `message`, `date` FROM {$this->prefix}log WHERE `game_id` = ? $whereBefore ORDER BY `date` DESC LIMIT ?";
+
+		$result = $this->query($q, $params);
 
 		if (!$result) {
-			die(mysqli_error($result));
+			die(mysqli_error($this->connection));
 		}
 
 		return $result->fetch_all(MYSQLI_ASSOC);
