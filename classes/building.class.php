@@ -28,7 +28,7 @@ class Building {
             $n = str_replace("_", " " , $this->type);
             $this->name = ucwords($n) . " " . $this->id;
         }
-        
+
         return $this->name;
     }
 

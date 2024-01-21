@@ -5,7 +5,7 @@ require_once "game.php";
 class Station
 {
 	var $id;
-	
+
 	private $town_id;
 	private $name;
 	private $lat;
@@ -20,7 +20,7 @@ class Station
 	function getName () {
 		return $this->name;
 	}
-	
+
 	function getTown()
 	{
 		global $g;
@@ -39,7 +39,7 @@ class Station
 	function getLatLon () {
 		return [$this->lat, $this->lon];
 	}
-	
+
 	static function getStation ($id)
 	{
 		global $g;
@@ -55,10 +55,10 @@ class Station
 			self::$_singleton[$id]->lat = $station['lat'];
 			self::$_singleton[$id]->lon = $station['lon'];
 		}
-		
+
 		return self::$_singleton[$id];
 	}
-	
+
 	static function getStations ($ids=null)
 	{
 		if (!$ids) {

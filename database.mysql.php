@@ -3,14 +3,14 @@ require_once("constants.php");
 class DB
 {
 	private $connection;
-	
+
     function DB()
 	{
 		global $CONST;
 		$this->connection = mysql_connect(DB_HOST, DB_USER, DB_PASS) or die("Server Error<br>Cannot connect to database server");
 		mysql_select_db(DB_NAME, $this->connection) or die("Server Error<br>Cannot select database");
     }
-	
+
 	function log($message, $level=1)
 	{
 		if(isset($_GET['debug']))
@@ -22,7 +22,7 @@ class DB
 		}
 		else
 			$debug = 0;
-		
+
 		if($debug >= $level)
 			echo $message."<br>\n";
 	}
@@ -36,7 +36,7 @@ class DB
 		}
 		return $result;
 	}
-	
+
 	function getData($key){
 		global $CONST;
 		if(!isset($this->data[$key])){
@@ -50,7 +50,7 @@ class DB
 		}
 		return $this->data[$key];
 	}
-	
+
 	function getLocos(){
 		if(!isset($this->locos)){
 			$this->locos = array();
@@ -64,14 +64,14 @@ class DB
 		}
 		return $this->locos;
 	}
-	
+
 	function getTrain ($id)
 	{
 		$trains = $this->getTrains();
-		
+
 		return isset($trains[$id]) ? $trains[$id] : null;
 	}
-	
+
 	function getTrains ()
 	{
 		if(!isset($this->trains)){
@@ -94,10 +94,10 @@ class DB
 				}
 			}
 		}
-		
+
 		return $this->trains;
 	}
-	
+
 	function getBuildings(){
 		if(!isset($this->buildings)){
 			$this->buildings = array();
@@ -109,7 +109,7 @@ class DB
 		}
 		return $this->buildings;
 	}
-	
+
 	function getTowns($tid = -1){
 		if(!isset($this->towns)){
 			$this->towns = array();
@@ -121,7 +121,7 @@ class DB
 		}
 		return ($tid == -1 || $tid == "") ? $this->towns : $this->towns[$tid];
 	}
-	
+
 	function getStations(){
 		if(!isset($this->stations)){
 			$this->stations = array();
@@ -133,7 +133,7 @@ class DB
 		}
 		return $this->stations;
 	}
-	
+
 	function getCommodities($town_id, $commodity="")
 	{
 		global $debug;
@@ -148,7 +148,7 @@ class DB
 				}
 			}
 		}
-		
+
 		if(!strlen($commodity))
 		{
 			$debug->log('Commodity not specified', 2);
@@ -166,25 +166,25 @@ class DB
 			return $this->commodities[$town_id][$commodity];
 		}
 	}
-	
+
 	function setData($key, $value){
 		$q = "INSERT INTO `".TABLE_data."` (`key`, `value`) VALUES ('$key', '$value') ON DUPLICATE KEY UPDATE `value` = '$value'";
 		$this->query($q);
 		$this->data[$key] = $value;
 	}
-	
+
 	function updateTrain($id, $key, $value){
 		$q = "UPDATE `".TABLE_trains."` SET `$key` = '$value' WHERE `id` = '$id'";
 		$this->query($q);
 		$this->trains[$id][$key] = $value;
 	}
-	
+
 	/**
 	 * Big method to calculate entire economy!
 	 */
 	function updateCommodities($town_id, $commodity, $dsurplus){
 		global $debug, $CONST;
-		
+
 		$c = $this->getCommodities($town_id);
 		//print_r($c);
 		if(isset($c[$commodity]))
@@ -241,7 +241,7 @@ class DB
 			$price *= (rand(16, 25) / 20);
 			$supply = $dsurplus;
 		}
-		
+
 		$q = "INSERT INTO `".TABLE_commodities."` (`town_id`,`commodity`,`surplus`,`demand`,`price`) "
 			."VALUES ('$town_id','$commodity','$supply','$demand','$price') "
 			."ON DUPLICATE KEY UPDATE `surplus` = '$supply', `demand` = '$demand', `price` = '$price'";
@@ -255,10 +255,10 @@ class DB
 		$this->commodities[$town_id][$commodity]['demand']	= $demand;
 		$this->commodities[$town_id][$commodity]['price']	= $price;
 	}
-	
+
 	function populateLocosTable(){
 		global $CONST;
-		
+
 		$year = substr($this->getData('date'), 0, 4);
 		foreach($CONST['locos'] as $id => $loco){
 			$active = ($loco['start_year'] < $year);
@@ -270,7 +270,7 @@ class DB
 	}
 
 	function reset () {
-		$this->queryMultiple("DELETE FROM data; 
+		$this->queryMultiple("DELETE FROM data;
 			DELETE FROM availability;
 			UPDATE buildings SET scale = 1, wealth = 0;
 			UPDATE trains SET Car_1 = NULL, Car_2 = NULL, Car_3 = NULL, Car_4 = NULL, Car_5 = NULL, Car_6 = NULL, Car_7 = NULL, Car_8 = NULL;");

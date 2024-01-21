@@ -2,9 +2,9 @@
 
 function updateEconomyVideo () {
     global $g;
-    
+
 	$show = isset($_GET['view']) ? $_GET['view'] : "towns";
-	$showOptions = ["Towns","Commodities","Buildings","Demand"]; 
+	$showOptions = ["Towns","Commodities","Buildings","Demand"];
 
 	echo '<p>';
 	foreach ($showOptions as $o) {

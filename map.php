@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL);
-ini_set("display_errors", 1); 
+ini_set("display_errors", 1);
 
 require_once "constants.php";
 require_once "database.php";
@@ -62,9 +62,17 @@ if ($debug_level) {
     // echo 'Image Size: ' . $img_w . 'x' . $img_h . ' Scale: ' . $x_scale . 'x' . $y_scale;
 }
 
-$g = new Game();
-$trains = Train::getTrains();
-$towns = $g->getTowns();
+session_start();
+if (isset($_SESSION['game_id'])) {
+	$g = new Game($_SESSION['game_id']);
+} else {
+    $tc = imagecolorallocate ($img, 255, 0, 0);
+    imagestring ($img, 5, 5, 5, 'No Game', $tc);
+    header('Content-Type: image/gif');
+    imagegif($img);
+    imagedestroy($img);
+    exit;
+}
 
 // $towns = array(
 //     array("name" => "thurso", "lon" => -3.5221, "lat" => 58.5936),
@@ -94,7 +102,7 @@ function interpolate ($ax, $ay, $bx, $by, $t) {
     return [$x, $y];
 }
 
-foreach ($trains as $train) {
+foreach (Train::getTrains() as $train) {
     $route_towns = $train->getTowns();
     $seg = $train->getSegment();
 
@@ -117,7 +125,7 @@ foreach ($trains as $train) {
     }
 }
 
-foreach ($towns as $town) {
+foreach ($g->getTowns() as $town) {
     list($x, $y) = toCoords($town['lon'], $town['lat']);
 
     if ($debug_level) {

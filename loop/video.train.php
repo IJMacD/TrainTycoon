@@ -2,7 +2,7 @@
 
 function updateTrainVideo () {
     global $g, $lang, $debug, $CONST;
-    
+
     echo '<h1>'.$lang['en']['trains'].'</h1>';
 	foreach(Train::getTrains() as $train){
 		/*
@@ -12,6 +12,7 @@ function updateTrainVideo () {
 		}
 		echo '</div>';
 		*/
+
 		$station_names = array_map(function ($s) { return $s->getName(); }, $train->getStations());
 		$i = $train->getNextIndex();
 		$station_names[$i] = '<b>' . $station_names[$i] . '</b>';
@@ -24,6 +25,7 @@ function updateTrainVideo () {
 		foreach($train->getCars() as $car){
 			echo '<img src="'.$CONST['commodities'][$car]['car_image'].'" title="'.$car.'">';
 		}
+
 
 		if($train->isAtStation())
 		{
@@ -52,6 +54,6 @@ function updateTrainVideo () {
 		echo '<br><img src="images/progress.gif" height="1" width="'.min($train->getProgress(),100).'%">';
 		echo '</div>';
 	}
-	
+
 	if(count($g->getTrains()) < 1) $lang['en']['no_trains'];
 }

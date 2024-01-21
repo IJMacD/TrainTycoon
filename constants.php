@@ -1,4 +1,5 @@
 <?php
+define("STATE_NOGAME", -1);
 define("STATE_PAUSED", 0);
 define("STATE_VSLOW", 1);
 define("STATE_SLOW", 2);

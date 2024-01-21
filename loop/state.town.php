@@ -2,12 +2,12 @@
 
 function updateTownState () {
     global $g, $debug;
-    
+
 	// update population based consumption
 	foreach ($g->getTowns() as $town) {
 		$pop = $town['population'];
 		$kpop = $pop / 1e6;
-		
+
 		foreach ($g->getProduction('population') as $rate) {
 			$c = $g->getCommodities($town['id'], $rate['commodity']);
 			$delta = $rate['supplies'] > 0 ? $rate['supplies'] : -$rate['demands'];

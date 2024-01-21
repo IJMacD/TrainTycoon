@@ -1,8 +1,8 @@
-<?php 
+<?php
 
 function updateTrainState () {
     global $g, $debug;
-    
+
 	//updateTrains()
 	foreach(Train::getTrains() as $train){
 		// Stopped Trains
@@ -26,14 +26,14 @@ function updateTrainState () {
 			}
 		}
 
-		if ($train->isReadyToLoad()) 
+		if ($train->isReadyToLoad())
 		{
 
 			$town_id = $train->getTown();
-			
+
 			//turnaround
 			$train->moveToNextStation();
-			
+
 			//load
 			$next_town = $train->getTown();
 			$debug->log("{$train->getName()} @ " . $g->getTown($town_id)['name'] . ' loading for ' . $g->getTown($next_town)['name']);
@@ -83,7 +83,7 @@ function updateTrainState () {
 						break;
 					}
 				}
-				
+
 				$debug->log('Loaded '.$loaded.' '.$commodity_to_load['name']);
 				$cost = $g->updateCommodities($town_id, $commodity_to_load['name'], -$loaded);
 

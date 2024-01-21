@@ -16,7 +16,20 @@ require_once "loop/video.train.php";
 require_once "loop/video.economy.php";
 require_once "loop/video.edit.php";
 
-$g = new Game();
+session_start();
+
+if(isset($_GET['action'])) {
+	if ($_GET['action'] == "new-game") {
+		$_SESSION['game_id'] = Game::newGame();
+	}
+}
+
+if (isset($_SESSION['game_id'])) {
+	$g = new Game($_SESSION['game_id']);
+} else {
+	echo '<h1>No Game</h1>';
+	exit;
+}
 
 $video = isset($_GET['video']) ? $_GET['video'] : "default";
 
@@ -38,10 +51,9 @@ function loop(){
 // Read Paramaters from query string
 function updateInput(){
 	global $g, $CONST, $video;
-	
+
 	if(isset($_GET['action'])) {
-		if ($_GET['action'] == "new-game") $g->newGame();
-		else if ($_GET['action'] == "play-game") $g->State(STATE_NORM);
+		if ($_GET['action'] == "play-game") $g->State(STATE_NORM);
 		else if ($_GET['action'] == "pause-game") $g->State(STATE_PAUSED);
 		else if ($_GET['action'] == "reset") $g->reset();
 		else if ($_GET['action'] === "new-station") {
@@ -51,11 +63,11 @@ function updateInput(){
 			$name = $_POST['new-station-name'];
 
 			$town = $g->getTown($town_id);
-			
+
 			if (!$name) {
 				$r = rand(0, count($CONST['station_suffixes']));
 				$suffix = $r === 0 ? "" : " " . $CONST['station_suffixes'][$r - 1];
-				$name = $town['name'] . $suffix; 
+				$name = $town['name'] . $suffix;
 			}
 
 			$g->createStation($town_id, $name);
@@ -117,9 +129,9 @@ function updateState(){
 			$g->setData('simstamp', $simstamp);
 			//$g->setData('date', date('Y-m-d', $simstamp));
 		}
-		
+
 		updateTrainState();
-		
+
 		updateBuildingState();
 
 		updateTownState();
@@ -159,26 +171,26 @@ function updateVideo(){
 	if($g->State() == STATE_PAUSED) echo '<h1 style="color: red;">'.$lang['en']['paused'].'</h1>';
 	echo "<p>Date: ".date("Y-m-d", $g->getData('simstamp')) . "</p>";
 	echo "<p>Wealth: ". sprintf('$%.2f', $g->getData('wealth')) . "</p>";
-	
+
 	updateTrainVideo();
 
 	updateEconomyVideo();
-
 }
+
 function outputJSON()
 {
 	global $g, $CONST, $lang;
-	
+
 	$result = array();
-	
+
 	$result['gameState'] = $g->getData('gameState');
 	//$result['gameStatus'] = $lang['en']['paused'];
-	
+
 	$result['date'] = date("Y-m-d", $g->getData('simstamp'));
 	$result['simstamp'] = $g->getData('simstamp');
-	
+
 	$result['trains'] = array();
-	
+
 	foreach(Train::getTrains() as $_train)
 	{
 		/*
@@ -189,54 +201,54 @@ function outputJSON()
 		echo '</div>';
 		*/
 		$train = array();
-		
+
 		$train['id'] = $_train->id;
 		$train['name'] = $_train->getName();
-		
+
 		$train['loco'] = array();
 		$train['loco']['id'] = $_train->getLocoID();
 		$train['loco']['type'] = '';
 		$train['loco']['image'] = $CONST['locos'][$_train->getLocoID()]['image'];
-		
+
 		$train['cars'] = array();
 
 		foreach($_train->getCars() as $_car){
 			$car = array();
-			
+
 			$car['type'] = $_car;
 			$car['image'] = $CONST['commodities'][$_car]['car_image'];
-			
+
 			$train['cars'][] = $car;
 		}
-		
+
 		$train['speed'] = $_train->getSpeed();
 		$train['progress'] = $_train->getProgress();
 		$train['station'] = array();
 		$train['station']['id'] = 0;
 		$train['station']['town'] = 0;
 		$train['station']['name'] = $_train->getNextStation();
-		
+
 		$result['trains'][] = $train;
 	}
-	
+
 	$result['towns'] = array();
-	
+
 	foreach($g->getTowns() as $_town)
 	{
 		$town = array();
-		
+
 		$town['id'] = $_town['id'];
 		$town['name'] = $_town['name'];
-		
+
 		$town['commodities'] = array();
-		
+
 		foreach($g->getCommodities($_town['id']) as $commodity)
 		{
 			$town['commodities'][$commodity['name']] = $commodity;
 		}
-		
+
 		$result['towns'][$town['name']] = $town;
 	}
-	
+
 	echo json_encode($result);
 }

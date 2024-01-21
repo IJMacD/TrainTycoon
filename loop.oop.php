@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL);
-ini_set("display_errors", 1); 
+ini_set("display_errors", 1);
 require_once("constants.php");
 require_once("database.php");
 require_once("game.php");
@@ -39,7 +39,7 @@ function updateState(){
 	if($g->delta > TIMEOUT){
 		$g->State(STATE_PAUSED);
 	}
-	
+
 	if($g->State() != STATE_PAUSED){
 		$simstamp = $g->getData('simstamp');
 		$simstamp += $g->dsimtime * 22896000; // Seconds in year
@@ -47,7 +47,7 @@ function updateState(){
 		$g->setData('simstamp', $simstamp);
 		//$g->setData('date', date('Y-m-d', $simstamp));
 	}
-	
+
 	//updateTrains()
 	foreach($g->getTrains() as $train){
 		// Stopped Trains
@@ -92,7 +92,7 @@ function updateState(){
 			$g->updateTrain($train['id'], 'segment', ($train['segment'] + 1)%count($train['route']));
 		}
 	}
-	
+
 	//updateBuildings()
 	if($g->State() != STATE_PAUSED){
 	foreach($g->getBuildings() as $building){

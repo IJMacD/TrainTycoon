@@ -4,28 +4,24 @@ require_once "constants.php";
 require_once "database.php";
 require_once "util.php";
 
-session_start();
-
 class Game
 {
 	private $database;
-	
+
 	var $lasttime;
 	var $delta;
 	var $dsimtime;
-	
-	function __construct ()
+
+	function __construct ($game_id)
 	{
 		global $debug;
 
-		$game_id = isset($_SESSION['game_id']) ? $_SESSION['game_id'] : null;
-
 		$this->database = new DB($game_id);
-		
+
 		$this->lasttime = $this->getData('lasttime');
 		$time = microtime(true);
 		$this->delta = $time - $this->lasttime;
-	
+
 		if($this->delta < MIN_DELTA) {
 			// Don't update too frequently e.g. multiple viewers
 			$this->delta = 0;
@@ -37,90 +33,83 @@ class Game
 			$this->delta = MAX_DELTA;
 		}
 
-		$debug->log('Delta: '.$this->delta);	
+		$debug->log('Delta: '.$this->delta);
 		$this->setData('lasttime', $time);
 		$this->dsimtime = $this->delta / TIME_SCALE * $this->Speed();
 		$debug->log("Delta (Sim): " . $this->dsimtime, 2);
 	}
 
-	function newGame () {
-		$game_id = uniqid();
-
-		$_SESSION['game_id'] = $game_id;
-
-		$this->database = new DB($game_id);
-
-		$this->database->create();
-	}
-
 	function getData($key){
 		return $this->database->getData($key);
 	}
-	
+
 	function setData($key, $value){
 		$this->database->setData($key, $value);
 	}
-	
+
 	function State($state=-1)
 	{
 		if($state!=-1)
 			$this->database->setData('gameState', $state);
+
 		return $this->database->getData('gameState');
 	}
-	
+
 	function Speed()
 	{
 		global $CONST;
 		return $CONST['game_speeds'][$this->database->getData('gameState')];
 	}
-	
+
 	function getLocos()
 	{
 		return $this->database->getLocos();
 	}
-	
+
 	function getTrain ($id)
 	{
 		return $this->database->getTrain($id);
 	}
-	
+
 	function getTrains ()
 	{
 		return $this->database->getTrains();
 	}
-	
+
 	function getBuildings()
 	{
 		return $this->database->getBuildings();
 	}
-	
+
 	function getStation ($id)
 	{
 		return $this->database->getStation($id);
 	}
-	
+
 	function getStations ()
 	{
 		return $this->database->getStations();
 	}
-	
+
 	function getBuildingTypes()
 	{
 		return $this->database->getBuildingTypes();
 	}
-	
+
 	function getTown ($tid)
 	{
 		return $this->database->getTowns($tid);
 	}
-	
+
 	function getTowns()
 	{
 		return $this->database->getTowns();
 	}
-	
+
 	function getCommodities ($town_id, $commodity="")
 	{
+		global $debug;
+
 		$commodities = $this->database->getCommodities($town_id);
 
 		/*
@@ -146,34 +135,34 @@ class Game
 		if ($commodity) {
 			foreach ($commodities as $c) {
 				if ($c['name'] == $commodity) return $c;
-			} 
-			$debug->log("Can't find commodity $commodity at town $town_id");
+			}
+			$debug->log("Can't find commodity $commodity at town $town_id", 2);
 			return null;
 		}
 
 		return $commodities;
 	}
-	
+
 	function getCommodityTypes ()
 	{
 		return $this->database->getCommodityTypes();
 	}
-	
+
 	function getCommodityList ($commodity)
 	{
 		return $this->database->getCommodityList($commodity);
 	}
 
-	function getCommoditySupplyDemand ($town_id) 
+	function getCommoditySupplyDemand ($town_id)
 	{
 		return $this->database->getCommoditySupplyDemand($town_id);
 	}
 
-	function getProduction ($type) 
+	function getProduction ($type)
 	{
 		return $this->database->getProduction($type);
 	}
-	
+
 	function updateTrain($id, $key, $value)
 	{
 		return $this->database->updateTrain($id, $key, $value);
@@ -182,11 +171,11 @@ class Game
 	function updateBuilding($id, $key, $value){
 		return $this->database->updateBuilding($id, $key, $value);
 	}
-	
+
 	function updateCommodities($town_id, $commodity, $dsurplus)
 	{
 		$c = $this->getCommodities($town_id, $commodity);
-		
+
 		$this->database->setCommodity($town_id, $commodity, $c['surplus'] + $dsurplus);
 
 		return $dsurplus * $c['price'];
@@ -231,5 +220,12 @@ class Game
 		$this->database->addRouteStop($train_id, $i, $station_id, $length);
 
 		return true;
+	}
+
+
+	static function newGame () {
+		$tmp_database = new DB();
+
+		return $tmp_database->createGame(uniqid());
 	}
 }

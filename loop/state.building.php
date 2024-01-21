@@ -2,7 +2,7 @@
 
 function updateBuildingState () {
     global $g, $debug;
-    
+
 	//updateBuildings()
 	if($g->State() != STATE_PAUSED)
 	{
@@ -15,14 +15,14 @@ function updateBuildingState () {
 
 			$total_cost = 0;
 			$total_revenue = 0;
-			
+
 			foreach($rates as $rate)
 			{
 				// check all negative rates
 				//		if it is producing it is fine
 				// if it is consuming check there is stock in the town to accomodate
 				$c = $g->getCommodities($town['id'], $rate['commodity']);
-				
+
 				$d = $g->dsimtime * $building->getScale();
 
 				$q_demand = $d * $rate['demands'];
@@ -30,7 +30,7 @@ function updateBuildingState () {
 
 				$total_cost += $q_demand * $c['price'];
 				$total_revenue += $q_supply * $c['price'];
-				
+
 				if($rate['demands'] > 0 && $c['surplus'] < $q_demand) {
 					$has_all_consumables = false;
 					$debug->log("Not enough {$rate['commodity']} available for ". $building->getName() . " in " . $town['name'], 2);

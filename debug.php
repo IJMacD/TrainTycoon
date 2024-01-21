@@ -1,7 +1,7 @@
 <?php
 
 class Debug {
-	
+
 	function log($message, $level=1)
 	{
 		if(isset($_GET['debug']))
@@ -13,7 +13,7 @@ class Debug {
 		}
 		else
 			$debug = 0;
-		
+
 		if($debug >= $level)
 			echo $message."<br>\n";
 	}

@@ -10,7 +10,7 @@ const holder = document.getElementById('map-holder');
 
 function makeMutex () {
 	let flag = false;
-	const done = () => flag = false; 
+	const done = () => flag = false;
 	return function mutex (fn) {
 		if (!flag) {
 			flag = true;
@@ -53,11 +53,11 @@ function update()
 		if (params.length) {
 			url += "?" + params.join("&");
 		}
-		
+
 		// console.log(new Date().toISOString() + " Loading " + url);
 		$('#trains').load(url, () => {
 			// Check after delay if looping has been set/unset in JS event loop
-			setTimeout(() => (looping && update()), 1000); 
+			setTimeout(() => (looping && update()), 1000);
 			done();
 		});
 
