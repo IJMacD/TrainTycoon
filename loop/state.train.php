@@ -23,6 +23,8 @@ function updateTrainState () {
 				$profit = $g->updateCommodities($town_id, $commodity, $count);
 				$wealth = $g->getData('wealth');
 				$g->setData('wealth', $wealth + $profit);
+
+				$g->insertLog("Sold {$count} x {$commodity} for ".round($profit, 2)." at " . $g->getTown($town_id)['name']);
 			}
 		}
 
@@ -89,6 +91,8 @@ function updateTrainState () {
 
 				$wealth = $g->getData('wealth');
 				$g->setData('wealth', $wealth + $cost);
+
+				$g->insertLog("Bought {$loaded} x ".$commodity_to_load['name']." for ".round(-$cost, 2)." at " . $g->getTown($town_id)['name']);
 			}
 
 			// $g->break();

@@ -15,6 +15,7 @@ require_once "loop/state.town.php";
 require_once "loop/video.train.php";
 require_once "loop/video.economy.php";
 require_once "loop/video.edit.php";
+require_once "loop/video.log.php";
 
 session_start();
 
@@ -72,7 +73,7 @@ function updateInput(){
 
 			$g->createStation($town_id, $name);
 
-			echo "<p>New station created in {$town['name']} called $name</p>";
+			$g->insertLog("New station created in {$town['name']} called $name");
 		} else if ($_GET['action'] === "new-building") {
 			$video = "edit";
 
@@ -82,7 +83,7 @@ function updateInput(){
 
 			$g->createBuilding($type, $town_id, $name);
 
-			echo "<p>New $type created in {$g->getTown($town_id)['name']}</p>";
+			$g->insertLog("New $type created in {$g->getTown($town_id)['name']}");
 		} else if ($_GET['action'] === "new-train") {
 			$video = "edit";
 
@@ -92,7 +93,7 @@ function updateInput(){
 			$station2_id = $_POST['new-train-station2'];
 
 			if ($g->createTrain($loco_id, $name, [$station1_id, $station2_id])) {
-				echo "<p>New train created pulled by {$CONST['locos'][$loco_id]['name']}</p>";
+				$g->insertLog("New train created pulled by {$CONST['locos'][$loco_id]['name']}");
 			} else {
 				echo "<p>There was a problem creating the train</p>";
 			}
@@ -101,13 +102,13 @@ function updateInput(){
 
 			$train_id = $_POST['route-add-train'];
 			$station_id = $_POST['route-add-station'];
-			
+
 			if ($g->addRouteStop($train_id, $station_id)) {
 
 				$train = Train::getTrain($train_id);
 				$station = Station::getStation($station_id);
 
-				echo "<p>Added new stop at " . $station->getName() . " to train " . $train->getName() . "</p>";
+				$g->insertLog("Added new stop at " . $station->getName() . " to train " . $train->getName());
 			} else {
 				echo "<p>Unable to add new stop</p>";
 			}
@@ -170,11 +171,13 @@ function updateVideo(){
 
 	if($g->State() == STATE_PAUSED) echo '<h1 style="color: red;">'.$lang['en']['paused'].'</h1>';
 	echo "<p>Date: ".date("Y-m-d", $g->getData('simstamp')) . "</p>";
-	echo "<p>Wealth: ". sprintf('$%.2f', $g->getData('wealth')) . "</p>";
+	echo "<p>Cash: ". sprintf('$%.2f', $g->getData('wealth')) . "</p>";
 
 	updateTrainVideo();
 
 	updateEconomyVideo();
+
+	updateLogVideo();
 }
 
 function outputJSON()

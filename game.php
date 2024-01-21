@@ -222,6 +222,13 @@ class Game
 		return true;
 	}
 
+	function getLog () {
+		return $this->database->getLog();
+	}
+
+	function insertLog ($message) {
+		return $this->database->insertLog($message);
+	}
 
 	static function newGame () {
 		$tmp_database = new DB();

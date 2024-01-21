@@ -37,7 +37,7 @@ function updateEconomyVideo () {
 		case "commodities":
 			foreach ($g->getCommodityTypes() as $commodity) {
 				echo '<div id="commodity_'.$commodity.'" class="town_list"><b>'.ucfirst($commodity).'</b><br>';
-				echo '<table><tr><th>Town</th><th>Surplus</th><th>Price</th></tr>';
+				echo '<table><tr><th>Town</th><th>Available</th><th>Price</th></tr>';
 				foreach($g->getCommodityList($commodity) as $c){
 					$h = $c['available'] <= 0 ? 'class="hidden-detail"' : '';
 					echo "<tr $h><td>".$g->getTown($c['town_id'])['name'].'</td><td>'.sprintf('%.3f', $c['available']).'</td><td>$'.sprintf('%.2f', $c['price']).'</td></tr>';
@@ -50,8 +50,15 @@ function updateEconomyVideo () {
 				echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['name'].'</b><br>';
 				echo '<table><tr><th>Name</th><th>Supply</th><th>Demand</th><th>Available</th></tr>';
 				foreach($g->getCommoditySupplyDemand($town['id']) as $commodity){
-					$h = $commodity['available'] <= 0 ? 'class="hidden-detail"' : '';
-					echo "<tr $h><td>".$commodity['type'].'</td><td>'.sprintf('%.3f', $commodity['supply']).'</td><td>'.sprintf('%.3f', $commodity['demand']).'</td><td>'.sprintf('%.3f', $commodity['available']).'</td></tr>';
+					$hidden = $commodity['available'] <= 0 &&
+						$commodity['supply'] <= 0 &&
+						$commodity['demand'] <= 0;
+					$h = $hidden ? 'class="hidden-detail"' : '';
+					echo "<tr $h><td>". $commodity['type'].'</td>'
+						.'<td>'.sprintf('%.3f', $commodity['supply']).'</td>'
+						.'<td>'.sprintf('%.3f', $commodity['demand']).'</td>'
+						.'<td>'.sprintf('%.3f', $commodity['available']).'</td>'
+						.'</tr>';
 				}
 				echo '</table></div>';
 			}

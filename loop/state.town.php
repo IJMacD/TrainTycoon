@@ -10,6 +10,11 @@ function updateTownState () {
 
 		foreach ($g->getProduction('population') as $rate) {
 			$c = $g->getCommodities($town['id'], $rate['commodity']);
+
+			if ($c === null) {
+				continue;
+			}
+
 			$delta = $rate['supplies'] > 0 ? $rate['supplies'] : -$rate['demands'];
 			$quantity = $g->dsimtime * $delta * $kpop;
 			$debug->log("Trying to consume/produce $quantity of {$rate['commodity']} at {$town['name']}", 3);

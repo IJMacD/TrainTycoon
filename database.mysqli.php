@@ -347,6 +347,27 @@ class DB
 		$this->trains[$train_id]['route'][$i] = $value;
 	}
 
+	function insertLog($message){
+		if (!isset($this->game_id)) die ("Game ID not set");
+
+		$q = "INSERT INTO {$this->prefix}log (`game_id`, `message`) VALUES (?, ?)";
+		$this->query($q, [$this->game_id, $message]);
+	}
+
+	function getLog(){
+		if (!isset($this->game_id)) die ("Game ID not set");
+
+		$q = "SELECT `message`, `date` FROM {$this->prefix}log WHERE `game_id` = ? ORDER BY `date` DESC";
+
+		$result = $this->query($q, [$this->game_id]);
+
+		if (!$result) {
+			die(mysqli_error($result));
+		}
+
+		return $result->fetch_all(MYSQLI_ASSOC);
+	}
+
 	function reset () {
 		if (!isset($this->game_id)) die ("Game ID not set");
 

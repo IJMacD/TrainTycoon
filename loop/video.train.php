@@ -13,6 +13,21 @@ function updateTrainVideo () {
 		echo '</div>';
 		*/
 
+		$image_style = "overflow: hidden;white-space: nowrap;";
+
+		if (!$train->isAtStation()) {
+			if ($train->getDirection() == 1) {
+				$image_style .= "padding-left: ".(100-min($train->getProgress(),100))."%;";
+			}
+			else {
+				$image_style .= "padding-left: ".min($train->getProgress(),100)."%;";
+			}
+		}
+
+		if ($train->getDirection() == 1) {
+			$image_style .= "transform: scale(-1, 1);";
+		}
+
 		$station_names = array_map(function ($s) { return $s->getName(); }, $train->getStations());
 		$i = $train->getNextIndex();
 		$station_names[$i] = '<b>' . $station_names[$i] . '</b>';
@@ -20,25 +35,27 @@ function updateTrainVideo () {
 			. '<b>' . $train->getName() . '</b> '
 			. '('.implode(", ", $station_names).') '
 			. '<span class="direction-indicator">'.($train->getDirection() == 1 ? "UP" : "DOWN").'</span>'
-			. '<br>'
+			. '<div style="'.$image_style.'">'
 			. '<img src="'.$CONST['locos'][$train->getLocoID()]['image'].'">';
+
 		foreach($train->getCars() as $car){
 			echo '<img src="'.$CONST['commodities'][$car]['car_image'].'" title="'.$car.'">';
 		}
 
+		echo '</div>';
 
 		if($train->isAtStation())
 		{
 			if ($train->getSegment() == 0)
-				echo '<br>'.$lang['en']['stopped'];
+				echo $lang['en']['stopped'];
 			// else if ($train->isLoading())
 			// 	echo '<br>'.$lang['en']['stopped_at'].' '.$train->getNextStation() . " (Loading Time: " . $train->getLoadingTime() . ")";
 			else
-				echo '<br>'.$lang['en']['stopped_at'].' '.$train->getNextStation() . " (Loading Time: " . $train->getLoadingTime() . ")";
+				echo $lang['en']['stopped_at'].' '.$train->getNextStation() . " (Loading Time: " . $train->getLoadingTime() . ")";
 		}
 		else
 		{
-			echo '<br>'.$lang['en']['on_way_to'].' '.$train->getNextStation();
+			echo $lang['en']['on_way_to'].' '.$train->getNextStation();
 
 			$cars = $train->getCars();
 			if (count($cars)) {
