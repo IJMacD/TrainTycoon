@@ -21,7 +21,7 @@ function updateEconomyVideo () {
 	switch ($show) {
 		case "towns":
 			foreach($g->getTowns() as $town){
-				echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['name'].'</b><br>';
+				echo '<div id="town_'.$town['id'].'" class="town_list view-towns"><b>'.$town['name'].'</b><br>';
                 echo '<table><tr><th>Name</th><th>Quantity</th><th>Price</th></tr>';
                 $wealth = 0;
 				foreach($g->getCommodities($town['id']) as $commodity){
@@ -36,7 +36,7 @@ function updateEconomyVideo () {
 		break;
 		case "commodities":
 			foreach ($g->getCommodityTypes() as $commodity) {
-				echo '<div id="commodity_'.$commodity.'" class="town_list"><b>'.ucfirst($commodity).'</b><br>';
+				echo '<div id="commodity_'.$commodity.'" class="town_list view-commodities"><b>'.ucfirst($commodity).'</b><br>';
 				echo '<table><tr><th>Town</th><th>Available</th><th>Price</th></tr>';
 				foreach($g->getCommodityList($commodity) as $c){
 					$h = $c['available'] <= 0 ? 'class="hidden-detail"' : '';
@@ -47,7 +47,7 @@ function updateEconomyVideo () {
 		break;
 		case "demand":
 			foreach($g->getTowns() as $town){
-				echo '<div id="town_'.$town['id'].'" class="town_list"><b>'.$town['name'].'</b><br>';
+				echo '<div id="town_'.$town['id'].'" class="town_list view-demand"><b>'.$town['name'].'</b><br>';
 				echo '<table><tr><th>Name</th><th>Supply</th><th>Demand</th><th>Available</th></tr>';
 				foreach($g->getCommoditySupplyDemand($town['id']) as $commodity){
 					$hidden = $commodity['available'] <= 0 &&
@@ -65,7 +65,7 @@ function updateEconomyVideo () {
 		break;
 		case "buildings":
 			foreach(Building::getBuildings() as $building){
-                echo '<div id="building_'.$building->id.'" class="town_list"><b>'.$building->getName().'</b>';
+                echo '<div id="building_'.$building->id.'" class="town_list view-buildings"><b>'.$building->getName().'</b>';
                 $town = $building->getTown();
                 echo '<dl>';
                 echo '<dt>Town</dt><dd>'.$town['name'].'</dd>';

@@ -21,6 +21,9 @@ define("MAP_MAX_LAT", 59.74063649);
 
 $debug_level = isset($_GET['debug']) ? $_GET['debug'] : 0;
 
+$data_mode = isset($_GET['data']) ? $_GET['data'] : "";
+$commodity = isset($_GET['commodity']) ? $_GET['commodity'] : "";
+
 function LoadGif($imgname)
 {
     /* Attempt to open */
@@ -51,13 +54,18 @@ $img_h = imagesy($img);
 $town_colour = imagecolorallocate($img, 255, 128, 0);
 $track_colour = imagecolorallocate($img, 80, 80, 80);
 $train_colour = imagecolorallocate($img, 20, 140, 20);
+$supply_colour = imagecolorallocate($img, 255, 0, 0);
+$demand_colour = imagecolorallocate($img, 0, 0, 255);
+$available_colour = imagecolorallocate($img, 255, 148, 0);
+$money_colour = imagecolorallocate($img, 40, 240, 40);
+
+$text_colour = imagecolorallocate ($img, 255, 0, 0);
 
 $x_scale = $img_w / (MAP_MAX_LON - MAP_MIN_LON);
 $y_scale = $img_h / (MAP_MAX_LAT - MAP_MIN_LAT);
 
 if ($debug_level) {
     $line = 1;
-    $text_colour = imagecolorallocate ($img, 255, 0, 0);
     imagestring ($img, 4, 5, 15 * $line++, 'Image Size: ' . $img_w . 'x' . $img_h . ' Scale: ' . $x_scale . 'x' . $y_scale, $text_colour);
     // echo 'Image Size: ' . $img_w . 'x' . $img_h . ' Scale: ' . $x_scale . 'x' . $y_scale;
 }
@@ -125,6 +133,10 @@ foreach (Train::getTrains() as $train) {
     }
 }
 
+if ($data_mode && $commodity) {
+    imagestring ($img, 5, 5, 15, $commodity, $text_colour);
+}
+
 foreach ($g->getTowns() as $town) {
     list($x, $y) = toCoords($town['lon'], $town['lat']);
 
@@ -132,9 +144,50 @@ foreach ($g->getTowns() as $town) {
         imagestring ($img, 4, 5, 15 * $line++, $town['name'] . ' ('.$town['lon'].','.$town['lat'].') -> ('.$x.','.$y.')', $text_colour);
     }
 
-    if ($town['population'] > 1e6) {
+    $town_commodity = null;
+    if ($commodity) {
+        $town_commodities = $g->getCommodities($town['id']);
+        foreach ($town_commodities as $tc) {
+            if ($tc['name'] === $commodity) {
+                $town_commodity = $tc;
+                break;
+            }
+        }
+    }
+
+    if ($commodity) {
+        if ($data_mode === "demand" && $town_commodity) {
+
+            $town_supply_demand = null;
+            foreach ($g->getCommoditySupplyDemand($town['id']) as $tsd) {
+                if ($tsd['type'] === $commodity) {
+                    $town_supply_demand = $tsd;
+                    break;
+                }
+            }
+
+            $supply = $town_supply_demand['supply'] * 5;
+            $demand = $town_supply_demand['demand'] * 5;
+
+            imagefilledrectangle($img, $x - 10, $y - $supply, $x - 2, $y, $supply_colour);
+            imagefilledrectangle($img, $x + 2, $y - $demand, $x + 10, $y, $demand_colour);
+        }
+        else if ($data_mode === "towns" && $town_commodity) {
+            $available = $town_commodity['surplus'] * 10;
+
+            imagefilledrectangle($img, $x - 10, $y - $available, $x + 10, $y, $available_colour);
+        }
+        else if ($data_mode === "commodities" && $town_commodity) {
+            $price = pow($town_commodity['price'], exp(1)) * 0.005;
+
+            imagefilledrectangle($img, $x - 10, $y - $price, $x + 10, $y, $track_colour);
+            imagefilledrectangle($img, $x - 8, $y - $price + 2, $x + 8, $y - 2, $money_colour);
+        }
+    }
+    else if ($town['population'] > 1e6) {
         imagefilledrectangle($img, $x - 10, $y - 10, $x + 10, $y + 10, $town_colour);
-    } else {
+    }
+    else {
         imagefilledellipse($img, $x, $y, 16, 16, $town_colour);
     }
 }

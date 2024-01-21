@@ -1,5 +1,7 @@
 var looping = false;
 var game;
+let mapData = "";
+let mapCommodity = "";
 
 const loopingBtn = document.getElementById('looping-btn');
 loopingBtn.addEventListener("click", () => looping ? stopLoop() : startLoop());
@@ -68,9 +70,27 @@ document.getElementById('full-details').addEventListener('change', e => {
 	document.body.classList.toggle("full-details", e.checked);
 });
 
+$(document.body).delegate('.view-towns td:first-child', 'click', function () {
+	mapCommodity = $(this).text();
+});
+
+$(document.body).delegate('.view-commodities', 'click', function () {
+	mapCommodity = this.id.substring(10);
+});
+
+// $(document.body).delegate('.view-buildings td:first-child', 'click', function () {
+// 	mapCommodity = $(this).text();
+// });
+
+$(document.body).delegate('.view-demand td:first-child', 'click', function () {
+	mapCommodity = $(this).text();
+});
+
 function updateImage () {
 	const count = $('input:checkbox:checked').length;
-	const url = `map.php?t=${Date.now()}${count?'&debug='+count:''}`;
+	const searchParams = new URLSearchParams(window.location.hash.substring(1));
+	const view = searchParams.get("view");
+	const url = `map.php?t=${Date.now()}${count?'&debug='+count:''}${view&&mapCommodity?`&data=${view}&commodity=${mapCommodity}`:''}`;
 
 
 	if(displayImg) {
@@ -78,8 +98,8 @@ function updateImage () {
 
 		img.onload = () => {
 			displayImg.src = url;
-			holder.style.width = `${img.width / devicePixelRatio / 2}px`;
-			holder.style.height = `${img.height / devicePixelRatio / 2}px`;
+			holder.style.width = `${img.width / 2}px`;
+			holder.style.height = `${img.height / 2}px`;
 
 			setTimeout(() => looping && updateImage(), 2000);
 		}
@@ -107,5 +127,8 @@ document.getElementById('edit').addEventListener("submit", e => {
     const body = new FormData(e.target);
     fetch(`loop.php?action=${body.get("action")}`, { method: "post", body })
         .then(r => r.text())
-        .then(t => document.getElementById('edit').innerHTML = t);
+        .then(t => {
+			document.getElementById('edit').innerHTML = t;
+			looping || run();
+		});
 });
