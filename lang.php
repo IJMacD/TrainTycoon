@@ -18,6 +18,5 @@ $lang['en']['paused']		= "PAUSED";
 
 $lang['en']['stopped']		= "Stopped";
 $lang['en']['stopped_at']	= "Stopped at";
-$lang['en']['on_way_to']	= "On the way to";
+$lang['en']['on_way_to']	= "Heading towards";
 $lang['en']['no_trains']	= "There are no trains";
-?>

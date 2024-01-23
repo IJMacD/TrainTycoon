@@ -15,6 +15,8 @@ class Train
 	private $towns = array();
 	private $stations  = array();
 
+	private $track = null;
+
 	// index of route array on way to
 	private $segment = 0;
 
@@ -28,7 +30,7 @@ class Train
 
 	private $loading_timeout = 0;
 
-	private $state = NULL;
+	public $state = NULL;
 
 	/**
 	 * Static
@@ -66,6 +68,10 @@ class Train
 	}
 	public function getDirection()
 	{
+		return $this->segment < 0 ? -1 : 1;
+	}
+	public function getTrackDirection()
+	{
 		return $this->direction;
 	}
 
@@ -86,12 +92,20 @@ class Train
 		return $this->state == "READY_TO_UNLOAD";
 	}
 
+	function isReadyToNavigate () {
+		return $this->state == "READY_TO_NAVIGATE";
+	}
+
 	function isLoading () {
 		return $this->state == "LOADING";
 	}
 
 	function isRunning () {
 		return $this->state == "RUNNING";
+	}
+
+	function isStopped () {
+		return $this->speed == 0;
 	}
 
 	function getLoadingTime () {
@@ -102,18 +116,35 @@ class Train
 		return sprintf("%02d:%02d", $i, $r * 60);
 	}
 
-	function getNextStation()
+	// Index of destination station in route
+	function getNextDestinationIndex()
+	{
+		return $this->segment < 0
+			? count($this->route) + $this->segment - 1
+			: $this->segment;
+	}
+
+	function getNextDestination()
 	{
 		// Ideal
 		//return Station::getStation($this->route[$this->segment]);
-		return $this->route[$this->getNextIndex()]['station_name'];
+		return $this->route[$this->getNextDestinationIndex()]['station_name'];
 		// progress == 0, segment != 0
 		//$train['route'][$train['segment']-1]
 	}
 
-	function getNextIndex()
+	function getNextStationID()
 	{
-		return $this->direction < 0 ? $this->segment - 1 : $this->segment;
+		return $this->route[$this->getNextDestinationIndex()]['station_id'];
+	}
+
+	function getNextTrackStationID()
+	{
+		if ($this->direction < 0) {
+			return $this->track['from_station_id'];
+		}
+
+		return $this->track['to_station_id'];
 	}
 
 	function getStations()
@@ -127,7 +158,7 @@ class Train
 	 */
 	function getTown()
 	{
-		return $this->route[$this->getNextIndex()]['town_id'];
+		return $this->route[$this->getNextDestinationIndex()]['town_id'];
 	}
 
 	function getNextTown()
@@ -143,6 +174,9 @@ class Train
 		return array_map(function ($v) { return $v['town_id']; }, $this->route);
 	}
 
+	function getTrack () {
+		return $this->track;
+	}
 
 	/**
 	 * Modifying functions
@@ -152,7 +186,7 @@ class Train
 		global $g, $debug;
 
 		if (!$this->isAtStation()) {
-			$distance = $this->route[$this->segment]['length'];
+			$distance = $this->track['length'];
 			if ($distance <= 0) {
 				$debug->log($this->getName() . " tried to move along a route with distance " . $distance);
 				$distance = 1;
@@ -162,51 +196,78 @@ class Train
 		}
 	}
 
-	function moveToNextStation()
+	function setNextDestination()
 	{
 		global $g;
 
 		/*
-		 *     Station:    A          B           C
-		 *     Segment:          1          2
-		 *
+		 * Station:         A          B           C         D
+		 * Segment (UP):          1          2         3
+		 * Segment (DOWN):       -3         -2        -1
 		 */
 
-		if ($this->direction < 0) {
-			if ($this->segment <= 1) {
-				$this->direction = 1;
+		$segment_count = count($this->route) - 1;
+
+		// DOWN
+		if ($this->segment < 0) {
+			// Got to end
+			if ($this->segment <= -$segment_count) {
+				// Reverse
 				$this->segment = 1;
-				$this->progress = 0;
 			}
 			else {
-				$this->progress = 100;
-				$this->segment = ($this->segment - 1) % count($this->route);
+				$this->segment--;
 			}
-		} else {
-			global $g;
-			if ($this->segment + 1 >= count($this->route)) {
-				$this->direction = -1;
-				$this->progress = 100;
-				$this->segment = count($this->route) - 1;
-			} else {
-				$this->progress = 0;
-				$this->segment = ($this->segment + 1) % count($this->route);
+		}
+		// UP
+		else {
+			// Got to end
+			if ($this->segment >= $segment_count) {
+				// Reverse
+				$this->segment = -1;
+			}
+			else {
+				$this->segment++;
 			}
 		}
 
-		// var_dump($this);
-
-		// exit;
-
-		$g->updateTrain($this->id, 'progress', $this->progress);
-		$g->updateTrain($this->id, 'segment', $this->segment);
-		$g->updateTrain($this->id, 'direction', $this->direction);
+		$g->updateTrain($this->id, "route_segment", $this->segment);
 
 		$this->loading_timeout = 0;
 		$g->updateTrain($this->id, "loading_timeout", $this->loading_timeout);
 
-		$this->state = "RUNNING";
+		$this->state = "READY_TO_NAVIGATE";
+
+		$g->insertLog("set new destination for " . $this->getName());
 	}
+
+	function moveToTrack ($track_id, $direction) {
+		global $g;
+
+		$this->direction = $direction;
+		$this->track = $g->getTrack($track_id);
+
+		$g->updateTrain($this->id, 'track_id', $this->track['id']);
+		$g->updateTrain($this->id, 'direction', $this->direction);
+		$g->updateTrain($this->id, 'progress', $this->direction > 0 ? 0 : 100);
+	}
+
+	function start () {
+		global $g;
+
+		$this->speed = 100;
+
+		$g->updateTrain($this->id, 'speed', $this->speed);
+	}
+
+	function stop () {
+		global $g;
+
+		$this->speed = 0;
+
+		$g->updateTrain($this->id, 'speed', $this->speed);
+	}
+
 	/**
 	 * Returns whether or not load was successful
 	 * don't try to load anymore after a failed load
@@ -282,32 +343,35 @@ class Train
 			$train->loco_id = $t['loco_id'];
 			$train->progress = $t['progress'];
 			$train->route = $t['route'];
-			$train->segment = min(max($t['segment'], 1), count($train->route) - 1);
+			$train->track = $t['track'];
+			$train->segment = $t['route_segment'];
 			$train->direction = $t['direction'];
 			$train->speed = $t['speed'];
 			$train->loading_timeout = $t['loading_timeout'];
 
-			if ($train->progress > 0 && $train->progress < 100) {
+			$is_at_node = ($train->direction > 0 && $train->progress >= 100)
+						|| ($train->direction < 0 && $train->progress <= 0);
+
+			$is_at_next_station = $is_at_node
+				&& $train->getNextTrackStationID() == $train->getNextStationID();
+
+			if ($train->direction === 0) {
+				$train->state = "STOPPED";
+			}
+			else if ($train->progress > 0 && $train->progress < 100) {
 				$train->state = "RUNNING";
 			}
-			else if ($train->loading_timeout > 0) {
+			else if ($is_at_next_station && $train->loading_timeout > 0) {
 				$train->state = "LOADING";
 			}
-			else if (
-				$train->loading_timeout == 0 && (
-					($train->direction > 0 && $train->progress > 100) ||
-					($train->direction < 0 && $train->progress < 0)
-				)
-			) {
+			else if ($is_at_next_station && $train->loading_timeout == 0 && $is_at_node) {
 				$train->state = "READY_TO_UNLOAD";
 			}
-			else if (
-				$train->loading_timeout < 0 && (
-					($train->direction > 0 && $train->progress >= 100) ||
-					($train->direction < 0 && $train->progress <= 0)
-				)
-			) {
+			else if ($is_at_next_station && $train->loading_timeout < 0 && $is_at_node) {
 				$train->state = "READY_TO_LOAD";
+			}
+			else if ($is_at_node) {
+				$train->state = "READY_TO_NAVIGATE";
 			}
 			else {
 				$train->state = "RUNNING";

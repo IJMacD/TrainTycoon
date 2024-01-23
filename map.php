@@ -111,26 +111,29 @@ function interpolate ($ax, $ay, $bx, $by, $t) {
 }
 
 foreach (Train::getTrains() as $train) {
-    $route_towns = $train->getTowns();
-    $seg = $train->getSegment();
+    $track = $train->getTrack();
 
-    for ($i = 1; $i < count($route_towns); $i++) {
-        $town_a = $g->getTown($route_towns[$i - 1]);
-        $town_b = $g->getTown($route_towns[$i]);
-
-        list($ax, $ay) = toCoords($town_a['lon'], $town_a['lat']);
-        list($bx, $by) = toCoords($town_b['lon'], $town_b['lat']);
-
-        imageline($img, $ax, $ay, $bx, $by, $track_colour);
-
-        if ($seg == $i) {
-            $t = $train->getProgress();
-
-            list($x, $y) = interpolate($ax, $ay, $bx, $by, $t / 100);
-
-            imagefilledellipse($img, $x, $y, 12, 12, $train_colour);
-        }
+    if (!$track) {
+        return;
     }
+
+    list($ax, $ay) = toCoords($track['from_lon'], $track['from_lat']);
+    list($bx, $by) = toCoords($track['to_lon'], $track['to_lat']);
+
+    $t = $train->getProgress();
+
+    list($x, $y) = interpolate($ax, $ay, $bx, $by, $t / 100);
+
+    // var_dump([$x, $y]);
+
+    imagefilledellipse($img, $x, $y, 12, 12, $train_colour);
+}
+
+foreach ($g->getTracks() as $track) {
+    list($ax, $ay) = toCoords($track['from_lon'], $track['from_lat']);
+    list($bx, $by) = toCoords($track['to_lon'], $track['to_lat']);
+
+    imageline($img, $ax, $ay, $bx, $by, $track_colour);
 }
 
 if ($data_mode && $commodity) {

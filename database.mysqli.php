@@ -25,7 +25,7 @@ class DB
 		if ($params) {
 			$stmt = mysqli_prepare($this->connection, $q);
 			if (!$stmt) {
-				die(mysqli_error($stmt));
+				die(mysqli_error($this->connection));
 			}
 			$types = implode("", array_map(function ($p) { return is_int($p) ? "i" : "s"; }, $params));
 			$stmt->bind_param($types, ...$params);
@@ -108,11 +108,19 @@ class DB
 
 		if(!isset($this->trains)){
 			$this->trains = array();
-			$q = "SELECT * FROM {$this->prefix}trains WHERE `game_id` = {$this->game_id} ORDER BY CASE WHEN `name` IS NULL THEN 1 ELSE 0 END, `name`";
+
+			$q = "SELECT *,
+				t.id AS id
+			FROM {$this->prefix}trains AS t
+				LEFT JOIN tracks ON t.track_id = tracks.id AND t.game_id = tracks.game_id
+			WHERE t.`game_id` = {$this->game_id}
+			ORDER BY CASE WHEN `name` IS NULL THEN 1 ELSE 0 END, `name`";
+
 			$result = $this->query($q);
 			if($result && $result->num_rows){
 				while($train = $result->fetch_assoc()){
 					$train['route'] = $this->getRoute($train['id']);
+					$train['track'] = $this->getTrack($train['track_id']);
 					$this->trains[$train['id']] = $train;
 				}
 			}
@@ -316,7 +324,7 @@ class DB
 
 	function getRoute ($route_id) {
 		$q = "SELECT
-			`station_id`,
+				`station_id`,
 				CASE WHEN `length` = 0 THEN 1 ELSE `length` END AS length,
 				`station_id`,
 				b.`name` AS station_name,
@@ -331,7 +339,79 @@ class DB
 			WHERE train_id = $route_id AND r.game_id = {$this->game_id}
 			ORDER BY `order`";
 
-		return $this->query($q)->fetch_all(MYSQLI_ASSOC);
+		$result = $this->query($q);
+
+		if (!$result) {
+			die(mysqli_error($this->connection));
+		}
+
+		return $result->fetch_all(MYSQLI_ASSOC);
+	}
+
+	function getTracks () {
+		$q = "SELECT
+				-- *,
+				t.id AS id,
+				`from_station_id`,
+				`to_station_id`,
+				`length`,
+				t_from.id AS from_town_id,
+				t_to.id AS to_town_id,
+				t_from.lat AS from_lat,
+				t_from.lon AS from_lon,
+				t_to.lat AS to_lat,
+				t_to.lon AS to_lon
+			FROM {$this->prefix}tracks AS t
+				JOIN {$this->prefix}buildings AS b_from
+					ON b_from.id = t.from_station_id AND b_from.game_id = t.game_id
+				JOIN {$this->prefix}buildings AS b_to
+					ON b_to.id = t.to_station_id AND b_to.game_id = t.game_id
+				JOIN {$this->prefix}towns AS t_from
+					ON t_from.id = b_from.town_id
+				JOIN {$this->prefix}towns AS t_to
+					ON t_to.id = b_to.town_id
+			WHERE t.game_id = ?";
+
+		$result = $this->query($q, [$this->game_id]);
+
+		if (!$result) {
+			die(mysqli_error($this->connection));
+		}
+
+		return $result->fetch_all(MYSQLI_ASSOC);
+	}
+
+	function getTrack ($id) {
+		$q = "SELECT
+				-- *,
+				t.id AS id,
+				`from_station_id`,
+				`to_station_id`,
+				`length`,
+				t_from.id AS from_town_id,
+				t_to.id AS to_town_id,
+				t_from.lat AS from_lat,
+				t_from.lon AS from_lon,
+				t_to.lat AS to_lat,
+				t_to.lon AS to_lon
+			FROM {$this->prefix}tracks AS t
+				JOIN {$this->prefix}buildings AS b_from
+					ON b_from.id = t.from_station_id AND b_from.game_id = t.game_id
+				JOIN {$this->prefix}buildings AS b_to
+					ON b_to.id = t.to_station_id AND b_to.game_id = t.game_id
+				JOIN {$this->prefix}towns AS t_from
+					ON t_from.id = b_from.town_id
+				JOIN {$this->prefix}towns AS t_to
+					ON t_to.id = b_to.town_id
+			WHERE t.game_id = ? AND t.id = ?";
+
+		$result = $this->query($q, [$this->game_id, $id]);
+
+		if (!$result) {
+			die(mysqli_error($this->connection));
+		}
+
+		return $result->fetch_assoc();
 	}
 
 	function addRouteStop ($route_id, $order, $station_id, $length = 1) {
@@ -347,6 +427,14 @@ class DB
 		$q = "UPDATE {$this->prefix}routes SET `$key` = ? WHERE `train_id` = ? AND `order` = ? AND `game_id` = {$this->game_id}";
 		$this->query($q, [$value, $train_id, $order]);
 		$this->trains[$train_id]['route'][$i] = $value;
+	}
+
+	function insertTrack ($from_station_id, $to_station_id, $length) {
+		if (!isset($this->game_id)) die ("Game ID not set");
+
+		$q = "INSERT INTO {$this->prefix}tracks (`game_id`, `from_station_id`, `to_station_id`, `length`) VALUES (?, ?, ?, ?)";
+
+		$this->query($q, [$this->game_id, $from_station_id, $to_station_id, $length]);
 	}
 
 	function insertLog($message){

@@ -13,14 +13,21 @@ function updateTrainVideo () {
 		echo '</div>';
 		*/
 
+		$route_progress = $train->getProgress() * $train->getDirection() * $train->getTrackDirection();
+
+		if ($route_progress < 0) {
+			$route_progress += 100;
+		}
+
 		$image_style = "overflow: hidden;white-space: nowrap;";
 
-		if (!$train->isAtStation()) {
+		if (!$train->isAtStation() && $train->isRunning()) {
+
 			if ($train->getDirection() == 1) {
-				$image_style .= "padding-left: ".(100-min($train->getProgress(),100))."%;";
+				$image_style .= "padding-left: ".(100-min($route_progress,100))."%;";
 			}
 			else {
-				$image_style .= "padding-left: ".min($train->getProgress(),100)."%;";
+				$image_style .= "padding-left: ".min($route_progress,100)."%;";
 			}
 		}
 
@@ -29,10 +36,10 @@ function updateTrainVideo () {
 		}
 
 		$station_names = array_map(function ($s) { return $s->getName(); }, $train->getStations());
-		$i = $train->getNextIndex();
+		$i = $train->getNextDestinationIndex();
 		$station_names[$i] = '<b>' . $station_names[$i] . '</b>';
 		echo '<div class="train_list" id="train_'.$train->id.'">'
-			. '<b>' . $train->getName() . '</b> '
+			. '<b>' . $train->getName() . '</b> ' . $train->state . ' '
 			. '('.implode(", ", $station_names).') '
 			. '<span class="direction-indicator">'.($train->getDirection() == 1 ? "UP" : "DOWN").'</span>'
 			. '<div style="'.$image_style.'">'
@@ -44,18 +51,26 @@ function updateTrainVideo () {
 
 		echo '</div>';
 
+		// echo '<pre>';
+		// var_dump($train);
+		// echo '</pre>';
+
 		if($train->isAtStation())
 		{
-			if ($train->getSegment() == 0)
-				echo $lang['en']['stopped'];
 			// else if ($train->isLoading())
 			// 	echo '<br>'.$lang['en']['stopped_at'].' '.$train->getNextStation() . " (Loading Time: " . $train->getLoadingTime() . ")";
-			else
-				echo $lang['en']['stopped_at'].' '.$train->getNextStation() . " (Loading Time: " . $train->getLoadingTime() . ")";
+			echo $lang['en']['stopped_at'].' '.$train->getNextDestination() . " (Loading Time: " . $train->getLoadingTime() . ")";
+		}
+		else if ($train->isStopped()) {
+			$station_id = $train->getNextTrackStationID();
+			$station = $g->getStation($station_id);
+			echo "Stopped near " . $station['name'] . " (No route to " . $train->getNextDestination() . ")";
 		}
 		else
 		{
-			echo $lang['en']['on_way_to'].' '.$train->getNextStation();
+			$towards_station = $g->getStation($train->getNextTrackStationID());
+
+			echo "Heading towards " . $towards_station['name'];
 
 			$cars = $train->getCars();
 			if (count($cars)) {
@@ -68,7 +83,8 @@ function updateTrainVideo () {
 				echo " (Value: " . sprintf('$%.2f', $value) . ")";
 			}
 		}
-		echo '<br><img src="images/progress.gif" height="1" width="'.min($train->getProgress(),100).'%">';
+
+		echo '<br><img src="images/progress.gif" height="1" width="'.min($route_progress,100).'%">';
 		echo '</div>';
 	}
 

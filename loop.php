@@ -97,7 +97,22 @@ function updateInput(){
 			} else {
 				echo "<p>There was a problem creating the train</p>";
 			}
-		} else if ($_GET['action'] === "route-add") {
+		}
+		else if ($_GET['action'] === "new-track") {
+			$video = "edit";
+
+			$station1_id = $_POST['new-track-station1'];
+			$station2_id = $_POST['new-track-station2'];
+
+			if ($g->createTrack($station1_id, $station2_id)) {
+				$station1_name = $g->getStation($station1_id)['name'];
+				$station2_name = $g->getStation($station2_id)['name'];
+				$g->insertLog("New track built between {$station1_name} and {$station2_name}");
+			} else {
+				echo "<p>There was a problem building the track</p>";
+			}
+		}
+		else if ($_GET['action'] === "route-add") {
 			$video = "edit";
 
 			$train_id = $_POST['route-add-train'];

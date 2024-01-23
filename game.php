@@ -106,6 +106,14 @@ class Game
 		return $this->database->getTowns();
 	}
 
+	function getTracks () {
+		return $this->database->getTracks();
+	}
+
+	function getTrack ($id) {
+		return $this->database->getTrack($id);
+	}
+
 	function getCommodities ($town_id, $commodity="")
 	{
 		global $debug;
@@ -212,6 +220,13 @@ class Game
 		return false;
 	}
 
+	function createTrack ($from_station_id, $to_station_id) {
+		$length = getStationDistance($from_station_id, $to_station_id);
+		$this->database->insertTrack($from_station_id, $to_station_id, $length);
+
+		return true;
+	}
+
 	function addRouteStop ($train_id, $station_id) {
 		$train = Train::getTrain($train_id);
 		$route = $train->getRoute();
@@ -232,6 +247,127 @@ class Game
 
 	function insertLog ($message) {
 		return $this->database->insertLog($message);
+	}
+
+	/**
+	 * Dijkstra's algorithm
+	 * @param int $current_station_id
+	 * @param int $target_station_id
+	 * @return array|false ['track_id' => number, 'direction' => number]
+	 */
+	function findRoute ($current_station_id, $target_station_id) {
+		if ($current_station_id == $target_station_id) {
+			return false;
+		}
+
+		$tracks = $this->getTracks();
+
+		$unvisited_nodes = [];
+		$visited_nodes = [];
+		$current_node = $current_station_id;
+
+		$prev_path = [];
+
+		// Setup
+		foreach ($this->getStations() as $station) {
+			$id = $station['id'];
+
+			$unvisited_nodes[$id] = $id == $current_station_id ? 0 : INF;
+		}
+
+		// Sanity
+		if (!isset($unvisited_nodes[$target_station_id])) {
+			die("Prevented infitine loop");
+		}
+
+		while (true) {
+			// Find all edges for this node
+			$connected_tracks = array_filter($tracks, function ($track) use ($current_node) {
+				return $track['from_station_id'] == $current_node
+					|| $track['to_station_id'] == $current_node;
+			});
+
+			$current_weight = $unvisited_nodes[$current_node];
+
+			// Consider all unvisited nodes connected to current node
+			foreach ($connected_tracks as $track) {
+				$neighbour_id = ($track['from_station_id'] == $current_node)
+					? $track['to_station_id']
+					: $track['from_station_id'];
+
+				if (isset($unvisited_nodes[$neighbour_id])) {
+					$dist = $current_weight + $track['length'];
+
+					// If the distance is shorter, assign the new distance
+					if ($dist < $unvisited_nodes[$neighbour_id]) {
+						$unvisited_nodes[$neighbour_id] = $dist;
+
+						// Save path for backtracking
+						$prev_path[$neighbour_id] = $current_node;
+					}
+				}
+			}
+
+			// Move current node to visited
+			$visited_nodes[$current_node] = $current_weight;
+			unset($unvisited_nodes[$current_node]);
+
+			// If target has been visited, then we're done
+			if (isset($visited_nodes[$target_station_id])) {
+				break;
+			}
+
+			// Find smallest unvisited node
+			$smallest_weight = INF;
+			foreach ($unvisited_nodes as $id => $weight) {
+				if ($weight < $smallest_weight) {
+					$current_node = $id;
+					$smallest_weight = $weight;
+				}
+			}
+			if ($smallest_weight === INF) {
+				// No route to destination
+				break;
+			}
+		}
+
+		if (!isset($visited_nodes[$target_station_id])) {
+			// Couldn't find path
+			return false;
+		}
+
+		// We found the shortest path. Now trace it to find route.
+		$path = [];
+
+		$prev = $target_station_id;
+		while ($prev && $prev != $current_station_id) {
+			$path[] = $prev;
+			$prev = $prev_path[$prev];
+		}
+
+		if (!$prev) {
+			echo "from: $current_station_id to: $target_station_id<br>\n";
+			var_dump($path);
+			die("Dijkstra's algorithm broke @ 1");
+		}
+
+		// var_dump($path);
+
+		$next_hop = $path[0];
+
+		$next_track = array_values(array_filter($tracks, function ($track) use ($next_hop) {
+			return $track['from_station_id'] == $next_hop
+				|| $track['to_station_id'] == $next_hop;
+		}));
+
+		if (count($next_track) === 0) {
+			die("Dijkstra's algorithm broke @ 2");
+		}
+
+		return [
+			'track_id' => $next_track[0]['id'],
+			'direction' => $next_track[0]['from_station_id'] == $current_station_id ? 1 : -1,
+		];
 	}
 
 	static function newGame () {

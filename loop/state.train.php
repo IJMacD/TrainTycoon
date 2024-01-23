@@ -9,8 +9,28 @@ function updateTrainState () {
 		//if($train['speed'] == 0)
 		//	$g->updateTrain($train['id'], 'speed', $CONST['locos'][$train['loco_id']]['topspeed']);
 			//print_r($train);
+
+		// Need to do routing
+		if ($train->isReadyToNavigate()) {
+			$target_station_id = $train->getNextStationID();
+			$current_node = $train->getNextTrackStationID();
+
+			$routing_result = $g->findRoute($current_node, $target_station_id);
+
+			if ($routing_result) {
+				$train->moveToTrack($routing_result['track_id'], $routing_result['direction']);
+				$train->start();
+				$g->insertLog("Routed train {$train->getName()} onto track " . $routing_result['track_id']);
+			}
+			else {
+				$train->stop();
+				$target_station = $g->getStation($target_station_id);
+				// $g->insertLog("No route found for {$train->getName()} to " . $target_station['name']);
+			}
+		}
+
 		// Train's Reached Destination
-		if ($train->isReadyToUnload())
+		else if ($train->isReadyToUnload())
 		{
 			$town_id = $train->getTown();
 
@@ -28,13 +48,13 @@ function updateTrainState () {
 			}
 		}
 
-		if ($train->isReadyToLoad())
+		else if ($train->isReadyToLoad())
 		{
 
 			$town_id = $train->getTown();
 
 			//turnaround
-			$train->moveToNextStation();
+			$train->setNextDestination();
 
 			//load
 			$next_town = $train->getTown();

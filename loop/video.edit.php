@@ -35,6 +35,25 @@ function updateEditVideo () {
     // echo '<button>Create</button>';
     // echo '</form>';
 
+    // New Track
+    if (count(Station::getStations()) >= 2) {
+        echo '<form class="edit-box">';
+        echo '<input type="hidden" name="action" value="new-track" />';
+        echo '<p><b>New Track</b></p>';
+        echo '<label>From Station <select name="new-track-station1">';
+        foreach(Station::getStations() as $station) {
+            echo '<option value="'.$station->id.'">'.$station->getName().'</option>';
+        }
+        echo '</select></label>';
+        echo '<label>To Station <select name="new-track-station2">';
+        foreach(Station::getStations() as $station) {
+            echo '<option value="'.$station->id.'">'.$station->getName().'</option>';
+        }
+        echo '</select></label>';
+        echo '<button>Create</button>';
+        echo '</form>';
+    }
+
     // New Train
     if (count(Station::getStations()) >= 2) {
         echo '<form class="edit-box">';
