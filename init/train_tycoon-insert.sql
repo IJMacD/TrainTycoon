@@ -1,0 +1,85 @@
+
+-- Dumping data for table train_tycoon.commodities: ~24 rows (approximately)
+INSERT INTO `commodities` (`type`, `supply_m`, `supply_c0`, `demand_m`, `demand_c0`) VALUES
+	('alcohol', -0.7, 80, 1, 0),
+	('clothing', -0.7, 65, 1, 0),
+	('coal', -0.7, 50, 1, 0),
+	('corn', -0.7, 50, 1, 0),
+	('cotton', -0.7, 50, 1, 0),
+	('fabric', -0.7, 50, 1, 0),
+	('furniture', -0.7, 70, 1, 0),
+	('goods', -0.7, 50, 1, 0),
+	('grain', -0.7, 25, 1, 0),
+	('iron', -0.7, 50, 1, 0),
+	('livestock', -0.7, 25, 1, 0),
+	('logs', -0.7, 45, 1, 0),
+	('lumber', -0.7, 55, 1, 0),
+	('mail', -0.7, 50, 1, 0),
+	('meat', -0.7, 50, 1, 0),
+	('milk', -0.7, 50, 1, 0),
+	('papers', -0.7, 50, 1, 0),
+	('passengers', -0.7, 90, 2, 0),
+	('produce', -0.7, 50, 1, 0),
+	('pulpwood', -0.7, 50, 1, 0),
+	('sugar', -0.7, 50, 1, 0),
+	('type', -0.7, 50, 1, 0),
+	('wood', -0.7, 50, 1, 0),
+	('wool', -0.7, 20, 1, 0);
+
+-- Dumping data for table train_tycoon.production: 24 rows
+/*!40000 ALTER TABLE `production` DISABLE KEYS */;
+INSERT INTO `production` (`type`, `commodity`, `supplies`, `demands`) VALUES
+	('sheep_farm', 'wool', 2, 0),
+	('textiles', 'wool', 0, 8),
+	('textiles', 'fabric', 8, 0),
+	('tailor', 'fabric', 0, 4),
+	('tailor', 'clothing', 4, 0),
+	('forest', 'logs', 6, 0),
+	('population', 'clothing', 0, 8),
+	('population', 'furniture', 0, 2),
+	('population', 'alcohol', 0, 2),
+	('farm', 'grain', 4, 0),
+	('distillery', 'grain', 0, 12),
+	('distillery', 'alcohol', 12, 0),
+	('post_office', 'mail', 4, 0),
+	('farm', 'livestock', 2, 0),
+	('abattoir', 'livestock', 0, 2),
+	('abattoir', 'meat', 12, 0),
+	('lumber_mill', 'logs', 0, 12),
+	('lumber_mill', 'lumber', 12, 0),
+	('population', 'mail', 0, 2),
+	('carpenter', 'lumber', 0, 2),
+	('carpenter', 'furniture', 2, 0),
+	('population', 'meat', 0, 4),
+	('station', 'passengers', 2, 0),
+	('population', 'passengers', 0, 4);
+/*!40000 ALTER TABLE `production` ENABLE KEYS */;
+
+-- Dumping data for table train_tycoon.towns: 24 rows
+/*!40000 ALTER TABLE `towns` DISABLE KEYS */;
+INSERT INTO `towns` (`id`, `name`, `lat`, `lon`, `population`) VALUES
+	(1, 'London', 51.5, -0.12, 13709000),
+	(2, 'Manchester', 53.5, -2.24, 2556000),
+	(3, 'Birmingham', 52.5, -1.9, 3683000),
+	(4, 'Nottingham', 53, -1.15, 1534000),
+	(5, 'Inverness', 57.4778, -4.2247, 70000),
+	(6, 'Edinburgh', 55.9533, -3.1883, 782000),
+	(7, 'Glasgow', 55.8642, -4.2518, 1395000),
+	(8, 'Liverpool', 53.4084, -2.9916, 2241000),
+	(9, 'Dublin', 53.3498, -6.2603, 1904806),
+	(10, 'Cambridge', 52.2053, 0.1218, 124798),
+	(11, 'Oxford', 51.752, -1.2577, 152457),
+	(12, 'Cardiff', 51.4816, -3.1791, 1097000),
+	(13, 'Brighton', 50.8225, -0.1372, 769000),
+	(14, 'Plymouth', 50.3755, -4.1427, 262100),
+	(15, 'Leeds', 53.8008, -1.5491, 2302000),
+	(16, 'Newcastle', 54.9783, -1.6178, 1599000),
+	(17, 'Sheffield', 53.3811, -1.4701, 1569000),
+	(18, 'Portsmouth', 50.8198, -1.088, 1547000),
+	(19, 'Bristol', 51.4545, -2.5879, 1041000),
+	(20, 'Belfast', 54.5973, -5.9301, 799000),
+	(21, 'Leicester', 52.6369, -1.1398, 745000),
+	(22, 'Middlesbrough', 54.5742, -1.235, 656000),
+	(23, 'Bournemouth', 50.7192, -1.8808, 531000),
+	(24, 'York', 53.9583, -1.08028, 210618);
+/*!40000 ALTER TABLE `towns` ENABLE KEYS */;

@@ -34,3 +34,12 @@ function dist ($lat1, $lon1, $lat2, $lon2) {
 function toRadians ($deg) {
     return $deg * (pi()/180);
 }
+function interpolate ($ax, $ay, $bx, $by, $t) {
+    $dx = $bx - $ax;
+    $dy = $by - $ay;
+
+    $x = $ax + $dx * $t;
+    $y = $ay + $dy * $t;
+
+    return [$x, $y];
+}

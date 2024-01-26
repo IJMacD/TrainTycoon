@@ -56,7 +56,7 @@ function updateBuildingState () {
 				// Adjusting scale proportional to profit
 				// but move slowly towards target
 				$target = $profit * 2 + 1;
-				$t = 0.01;
+				$t = 0.001;
 				$building->setScale((1-$t) * $building->getScale() + $t * $target);
 			}
 			else if ($profit <= 0) {

@@ -33,6 +33,9 @@
 .full-details .hidden-detail {
 	display: revert;
 }
+.full-details .hidden-detail td {
+	color: #B2B2B2;
+}
 #map-holder {
 	overflow: hidden;
 }

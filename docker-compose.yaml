@@ -1,0 +1,18 @@
+services:
+  web:
+    build: .
+    image: train-tycoon
+    ports:
+      - "8000:80"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=train_tycoon
+    volumes:
+      - ./src:/var/www/html
+  db:
+    image: bitnami/mysql:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=train_tycoon
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d/

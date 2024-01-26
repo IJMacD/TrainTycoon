@@ -48,7 +48,7 @@ function update()
 			params.push(window.location.hash.substring(1));
 		}
 
-		const count = $('input:checkbox:checked').length;
+		const count = $('.debug-checkbox:checked').length;
 		if(count)
 			params.push('debug='+count);
 
@@ -87,29 +87,28 @@ $(document.body).delegate('.view-demand td:first-child', 'click', function () {
 });
 
 function updateImage () {
-	const count = $('input:checkbox:checked').length;
+	const count = $('.debug-checkbox:checked').length;
 	const searchParams = new URLSearchParams(window.location.hash.substring(1));
 	const view = searchParams.get("view");
 	const url = `map.php?t=${Date.now()}${count?'&debug='+count:''}${view&&mapCommodity?`&data=${view}&commodity=${mapCommodity}`:''}`;
 
 
 	if(displayImg) {
-		const img = new Image();
+		// const img = new Image();
 
-		img.onload = () => {
-			displayImg.src = url;
-			holder.style.width = `${img.width / 2}px`;
-			holder.style.height = `${img.height / 2}px`;
+		displayImg.onload = () => {
+			holder.style.width = `${displayImg.naturalWidth / 2}px`;
+			holder.style.height = `${displayImg.naturalHeight / 2}px`;
 
 			setTimeout(() => looping && updateImage(), 2000);
 		}
 
-		img.onerror = () => {
+		displayImg.onerror = () => {
 			console.log("Error loading map");
 			setTimeout(() => looping && updateImage(), 10000);
 		}
 
-		img.src = url;
+		displayImg.src = url;
 	}
 }
 displayImg.addEventListener("click", e => {
